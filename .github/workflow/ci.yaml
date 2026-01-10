@@ -1,0 +1,59 @@
+name: GitHub Profile Analytics
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+jobs:
+  analytics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache repos
+        uses: actions/cache@v4
+        with:
+          path: repos
+          key: repos-${{ runner.os }}
+          restore-keys: repos-
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cloc python3-pip
+          pip install matplotlib plotly pyyaml jq
+
+      - name: Collect repositories & metadata
+        run: python scripts/collect.py
+
+      - name: Analyze LOC
+        run: python scripts/analyze_loc.py
+
+      - name: Compute metrics
+        run: |
+          python scripts/categorize.py
+          python scripts/efficiency.py
+          python scripts/impact.py
+          python scripts/normalize.py
+          python scripts/engineering_score.py
+
+      - name: Generate visuals
+        run: |
+          python scripts/charts_static.py
+          python scripts/charts_interactive.py
+          python scripts/heatmap.py
+          python scripts/badges.py
+
+      - name: Generate README
+        run: |
+          python scripts/render_readme.py
+
+      - name: Commit updates
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Update GitHub profile analytics" || exit 0
+          git push
