@@ -1,11 +1,17 @@
 import typer
 from pathlib import Path
-from analytics.pipeline import collect, analyze, visualize, render
+from analytics.pipeline import analyse, collect, visualize, render
+import typer
+from analytics.exceptions import AnalyticsError
 
 app = typer.Typer(
     name="analytics",
     help="GitHub profile analytics pipeline"
 )
+
+# @app.callback()
+# def main():
+#     pass
 
 @app.command()
 def collect_data(
@@ -29,7 +35,7 @@ def analyze_data(
     Compute metrics and normalized scores.
     """
     typer.echo("🧮 Analyzing data...")
-    analyze.run(input_dir=input_dir, output_dir=output_dir)
+    analyse.run(input_dir=input_dir, output_dir=output_dir)
     typer.echo("✅ Analysis complete")
 
 
@@ -67,11 +73,16 @@ def run(
     """
     Run full analytics pipeline.
     """
-    collect_data(username=username)
-    analyze_data()
-    visualize_data()
-    render_readme()
-
+    try:
+        typer.echo("🚀 Starting full analytics pipeline...")
+        collect_data(username=username)
+        analyze_data()
+        visualize_data()
+        render_readme()
+        typer.echo("🎉 Analytics pipeline complete!")
+    except AnalyticsError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 if __name__ == "__main__":
     app()

@@ -13,7 +13,7 @@ Here are some ideas to get you started:
 - ⚡ Fun fact: ...
 -->
 # 👋 Hi, I'm ToxicMender
-
+![Coverage](https://codecov.io/gh/toxicmender/toxicmender/branch/main/graph/badge.svg)
 ![Engineering Score](badges/engineering.svg)
 
 ## 🧠 Engineering Summary

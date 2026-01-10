@@ -6,6 +6,36 @@ on:
   workflow_dispatch:
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r analytics/requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest analytics/tests
+
+      - name: Run tests with coverage
+        run: |
+          pip install pytest pytest-cov mypy pydantic
+          mypy analytics
+          pytest --cov=analytics --cov-report=xml --cov-report=term
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+
+
   analytics:
     runs-on: ubuntu-latest
 
@@ -26,10 +56,10 @@ jobs:
           pip install matplotlib plotly pyyaml jq
 
       - name: Collect repositories & metadata
-        run: python scripts/collect.py
+        run: python -m analytics.cli collect-data --username toxicmender
 
       - name: Analyze LOC
-        run: python scripts/analyze_loc.py
+        run: python -m analytics.cli analyze-data
 
       - name: Compute metrics
         run: |
@@ -40,15 +70,10 @@ jobs:
           python scripts/engineering_score.py
 
       - name: Generate visuals
-        run: |
-          python scripts/charts_static.py
-          python scripts/charts_interactive.py
-          python scripts/heatmap.py
-          python scripts/badges.py
+        run: python -m analytics.cli visualize-data
 
       - name: Generate README
-        run: |
-          python scripts/render_readme.py
+        run: python -m analytics.cli render-readme
 
       - name: Commit updates
         run: |
