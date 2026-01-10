@@ -6,8 +6,21 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Ruff lint
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check --output-format=github
+
+
   tests:
     runs-on: ubuntu-latest
+    needs: lint
 
     steps:
       - uses: actions/checkout@v4
@@ -15,20 +28,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.12'
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
-        run: pip install -r analytics/requirements.txt
-
-      - name: Run tests
-        run: |
-          pytest analytics/tests
+        run: uv sync --all-extras
 
       - name: Run tests with coverage
         run: |
-          pip install pytest pytest-cov mypy pydantic
-          mypy analytics
-          pytest --cov=analytics --cov-report=xml --cov-report=term
+          uv run pytest --cov=analytics --cov-report=xml --cov-report=term
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -38,9 +48,18 @@ jobs:
 
   analytics:
     runs-on: ubuntu-latest
+    needs: tests
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v7
 
       - name: Cache repos
         uses: actions/cache@v4
@@ -51,29 +70,28 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cloc python3-pip
-          pip install matplotlib plotly pyyaml jq
+          uv sync
+          uv pip install matplotlib plotly pyyaml jq
 
       - name: Collect repositories & metadata
-        run: python -m analytics.cli collect-data --username toxicmender
+        run: uv run -m analytics.cli collect-data --username toxicmender
 
       - name: Analyze LOC
-        run: python -m analytics.cli analyze-data
+        run: uv run -m analytics.cli analyze-data
 
       - name: Compute metrics
         run: |
-          python scripts/categorize.py
-          python scripts/efficiency.py
-          python scripts/impact.py
-          python scripts/normalize.py
-          python scripts/engineering_score.py
+          uv run scripts/categorize.py
+          uv run scripts/efficiency.py
+          uv run scripts/impact.py
+          uv run scripts/normalize.py
+          uv run scripts/engineering_score.py
 
       - name: Generate visuals
-        run: python -m analytics.cli visualize-data
+        run: uv run -m analytics.cli visualize-data
 
       - name: Generate README
-        run: python -m analytics.cli render-readme
+        run: uv run -m analytics.cli render-readme
 
       - name: Commit updates
         run: |
@@ -82,3 +100,4 @@ jobs:
           git add .
           git commit -m "Update GitHub profile analytics" || exit 0
           git push
+
