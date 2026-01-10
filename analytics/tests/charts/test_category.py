@@ -68,6 +68,13 @@ def test_category_chart_invalid_directory(tmp_path):
 
 def test_category_chart_read_only_directory(tmp_path):
     """Test CategoryChart with read-only output directory."""
+    import sys
+    import platform
+    
+    # Skip on Windows as os.access behaves differently with permissions
+    if platform.system() == 'Windows':
+        pytest.skip("Permission checks behave differently on Windows")
+    
     data = {"Category1": [1.0], "Category2": [2.0]}
     categories = ["A"]
     chart = CategoryChart(data, categories)

@@ -1,5 +1,5 @@
 [project]
-name = "toxicmender"
+name = "gh-profile"
 version = "0.1.0"
 description = "Github Profile README with analytics"
 readme = "README.md"
@@ -8,6 +8,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "pydantic>=2.12.5",
     "pygithub>=2.8.1",
+    "pyyaml>=6.0.3",
     "typer>=0.21.1",
 ]
 

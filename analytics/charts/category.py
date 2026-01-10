@@ -37,7 +37,11 @@ class CategoryChart(Chart):
 
         # Prepare data for grouped bar chart
         x_pos = range(len(self.categories))
-        width = 0.8 / len(self.data)
+        # Handle empty data case
+        if len(self.data) == 0:
+            width = 0.8
+        else:
+            width = 0.8 / len(self.data)
 
         for idx, (category, values) in enumerate(self.data.items()):
             offsets = [i * width + idx * width for i in x_pos]

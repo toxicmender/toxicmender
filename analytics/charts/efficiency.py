@@ -38,10 +38,16 @@ class EfficiencyChart(Chart):
         fig, ax = plt.subplots(figsize=(12, 6))
 
         # Create bar chart with color gradient
-        colors = plt.cm.viridis(
-            [(v - min(efficiency_values)) / (max(efficiency_values) - min(efficiency_values))
-             for v in efficiency_values]
-        )
+        # Handle single value or identical values case
+        min_val = min(efficiency_values)
+        max_val = max(efficiency_values)
+        if max_val - min_val == 0:
+            # All values are the same, use single color
+            colors = plt.cm.viridis([0.5] * len(efficiency_values))
+        else:
+            colors = plt.cm.viridis(
+                [(v - min_val) / (max_val - min_val) for v in efficiency_values]
+            )
 
         ax.bar(repos, efficiency_values, color=colors)
         ax.set_xlabel("Repository")

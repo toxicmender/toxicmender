@@ -39,10 +39,12 @@ def test_breadth_metric_multiple_languages():
 
 def test_breadth_metric_no_languages():
     """Test breadth calculation with no languages."""
+    # Note: Using minimal valid values since PositiveInt requires > 0
+    # Empty languages dict is still valid for testing breadth = 0
     repo = RepoStats(
         name="empty-repo",
-        loc=0,
-        commits=0,
+        loc=1,
+        commits=1,
         stars=0,
         languages={}
     )

@@ -9,6 +9,11 @@ class TimeSeriesData(BaseModel):
     series_name: str
     data_points: list[TimePoint]
 
+__all__ = [
+    "TimePoint",
+    "TimeSeriesData"
+]
+
 # Example usage:
 if __name__ == "__main__":
     time_series = TimeSeriesData(

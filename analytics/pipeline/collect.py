@@ -31,8 +31,11 @@ class DataCollector:
             List of RepoStats objects
 
         Raises:
-            DataSourceError: If all sources fail
+            DataSourceError: If all sources fail or no sources provided
         """
+        if not self.sources:
+            raise DataSourceError("No data sources configured")
+        
         all_repos: List[RepoStats] = []
         errors: List[str] = []
 
@@ -48,10 +51,13 @@ class DataCollector:
                 logger.warning(error_msg)
                 errors.append(error_msg)
 
-        if not all_repos and errors:
-            raise DataSourceError(
-                f"Failed to collect data from any source. Errors: {errors}"
-            )
+        if not all_repos:
+            if errors:
+                raise DataSourceError(
+                    f"Failed to collect data from any source. Errors: {errors}"
+                )
+            else:
+                raise DataSourceError("No repository data collected from sources")
 
         # Remove duplicates by repository name
         unique_repos: Dict[str, RepoStats] = {}

@@ -38,6 +38,10 @@ class HeatmapChart(Chart):
         values = [self.data[name] for name in self.metric_names]
         correlation_matrix = np.corrcoef(values)
 
+        # Handle single metric case - corrcoef returns scalar
+        if correlation_matrix.ndim == 0:
+            correlation_matrix = np.array([[correlation_matrix]])
+
         fig, ax = plt.subplots(figsize=(10, 8))
 
         # Create heatmap

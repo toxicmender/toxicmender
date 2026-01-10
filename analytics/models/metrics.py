@@ -13,6 +13,12 @@ class EvaluationReport(BaseModel):
     metrics: Dict[str, MetricResult]
     overall_score: ScoreResult
 
+__all__ = [
+    "MetricResult",
+    "ScoreResult",
+    "EvaluationReport"
+]
+
 # Example usage:
 if __name__ == "__main__":
     accuracy_metric = MetricResult(

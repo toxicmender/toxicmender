@@ -57,14 +57,17 @@ def test_consistency_metric_low_loc_per_commit():
 
 
 def test_consistency_metric_zero_commits():
-    """Test consistency with zero commits."""
-    repo = RepoStats(
-        name="no-commits-repo",
-        loc=1000,
-        commits=0,
-        stars=0,
-        languages={"Python": 1000}
-    )
+    """Test that RepoStats validation rejects zero commits."""
+    # RepoStats requires PositiveInt for commits, so zero should raise ValidationError
+    with pytest.raises(Exception):  # ValidationError from pydantic
+        repo = RepoStats(
+            name="no-commits-repo",
+            loc=1000,
+            commits=0,
+            stars=0,
+            languages={"Python": 1000}
+        )
+
     metric = ConsistencyMetric()
     result = metric.compute([repo])
 
