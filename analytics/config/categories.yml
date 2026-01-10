@@ -1,0 +1,31 @@
+categories:
+  - core
+  - utilities
+  - data_processing
+  - testing
+  - documentation
+  - infrastructure
+  - experimental
+
+core_characteristics:
+  core:
+    description: "Core functionality and main features"
+    weight: 1.0
+  utilities:
+    description: "Helper functions and utility modules"
+    weight: 0.7
+  data_processing:
+    description: "Data transformation and processing"
+    weight: 0.8
+  testing:
+    description: "Test utilities and testing frameworks"
+    weight: 0.5
+  documentation:
+    description: "Documentation and examples"
+    weight: 0.3
+  infrastructure:
+    description: "Build, deployment, and CI/CD"
+    weight: 0.6
+  experimental:
+    description: "Experimental or prototype code"
+    weight: 0.2

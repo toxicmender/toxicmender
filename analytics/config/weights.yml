@@ -1,0 +1,26 @@
+metric_weights:
+  loc: 0.15
+  commits: 0.15
+  breadth: 0.10
+  consistency: 0.20
+  efficiency: 0.15
+  impact: 0.15
+  scale: 0.10
+
+normalization:
+  method: "log_minmax"
+  methods:
+    - "log_minmax"
+    - "z_score"
+    - "rank_based"
+
+scoring:
+  min_score: 0.0
+  max_score: 100.0
+  scale_factor: 1.0
+
+thresholds:
+  excellent: 80
+  good: 60
+  acceptable: 40
+  poor: 0

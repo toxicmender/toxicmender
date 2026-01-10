@@ -1,26 +1,33 @@
 from analytics.data_sources.base import DataSource
 from analytics.exceptions import DataSourceError
 from analytics.utils.validation import require_non_empty
-import subprocess
-import json
+from github import Github, GithubException
+
 
 class GitHubSource(DataSource):
     def __init__(self, username: str):
         require_non_empty(username, "username")
         self.username = username
+        self.client = Github()
 
     def fetch(self):
         try:
-            out = subprocess.check_output(
-                ["gh", "repo", "list", self.username, "--json", "name,stargazerCount"],
-                text=True
-            )
-            return json.loads(out)
-        except subprocess.CalledProcessError as e:
+            user = self.client.get_user(self.username)
+            repos = user.get_repos()
+
+            result = []
+            for repo in repos:
+                result.append({
+                    "name": repo.name,
+                    "stargazerCount": repo.stargazers_count
+                })
+
+            return result
+        except GithubException as e:
             raise DataSourceError(
                 f"Failed to fetch repos for {self.username}"
             ) from e
-        except json.JSONDecodeError as e:
+        except Exception as e:
             raise DataSourceError(
-                f"Failed to parse JSON response for {self.username}"
+                f"Failed to fetch repos for {self.username}"
             ) from e

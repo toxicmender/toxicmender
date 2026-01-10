@@ -1,7 +1,7 @@
 import pytest
 from analytics.data_sources.github import GitHubSource
 from analytics.exceptions import DataSourceError, ValidationError
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import json
 
 
@@ -19,12 +19,22 @@ def test_github_source_empty_username():
 
 def test_github_source_fetch_success():
     """Test successful GitHub data fetch."""
-    mock_output = json.dumps([
-        {"name": "linux", "stargazerCount": 1000},
-        {"name": "subsurface", "stargazerCount": 500}
-    ])
+    mock_repo1 = MagicMock()
+    mock_repo1.name = "linux"
+    mock_repo1.stargazers_count = 1000
 
-    with patch("subprocess.check_output", return_value=mock_output):
+    mock_repo2 = MagicMock()
+    mock_repo2.name = "subsurface"
+    mock_repo2.stargazers_count = 500
+
+    mock_user = MagicMock()
+    mock_user.get_repos.return_value = [mock_repo1, mock_repo2]
+
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.return_value = mock_user
+
         source = GitHubSource("torvalds")
         data = source.fetch()
 
@@ -37,9 +47,14 @@ def test_github_source_fetch_success():
 
 def test_github_source_fetch_empty_list():
     """Test GitHub fetch with no repositories."""
-    mock_output = json.dumps([])
+    mock_user = MagicMock()
+    mock_user.get_repos.return_value = []
 
-    with patch("subprocess.check_output", return_value=mock_output):
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.return_value = mock_user
+
         source = GitHubSource("user")
         data = source.fetch()
         assert data == []
@@ -47,11 +62,18 @@ def test_github_source_fetch_empty_list():
 
 def test_github_source_fetch_single_repo():
     """Test GitHub fetch with single repository."""
-    mock_output = json.dumps([
-        {"name": "project", "stargazerCount": 42}
-    ])
+    mock_repo = MagicMock()
+    mock_repo.name = "project"
+    mock_repo.stargazers_count = 42
 
-    with patch("subprocess.check_output", return_value=mock_output):
+    mock_user = MagicMock()
+    mock_user.get_repos.return_value = [mock_repo]
+
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.return_value = mock_user
+
         source = GitHubSource("user")
         data = source.fetch()
 
@@ -60,30 +82,41 @@ def test_github_source_fetch_single_repo():
 
 
 def test_github_source_fetch_command_error():
-    """Test GitHub fetch when gh command fails."""
-    with patch("subprocess.check_output") as mock_check:
-        mock_check.side_effect = Exception("gh command not found")
-        source = GitHubSource("user")
+    """Test GitHub fetch when API call fails."""
+    from github import GithubException
 
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.side_effect = GithubException(404, "Not Found")
+
+        source = GitHubSource("user")
         with pytest.raises(DataSourceError):
             source.fetch()
 
 
-def test_github_source_fetch_json_error():
-    """Test GitHub fetch with invalid JSON response."""
-    with patch("subprocess.check_output", return_value="invalid json"):
-        source = GitHubSource("user")
+def test_github_source_fetch_exception_error():
+    """Test GitHub fetch with general exception."""
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.side_effect = Exception("Network error")
 
+        source = GitHubSource("user")
         with pytest.raises(DataSourceError):
             source.fetch()
 
 
 def test_github_source_fetch_partial_error():
-    """Test GitHub fetch with subprocess error."""
-    import subprocess
-    error = subprocess.CalledProcessError(1, "gh")
+    """Test GitHub fetch with API error."""
+    from github import GithubException
+    error = GithubException(403, "Forbidden")
 
-    with patch("subprocess.check_output", side_effect=error):
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.side_effect = error
+
         source = GitHubSource("user")
 
         with pytest.raises(DataSourceError) as exc_info:
@@ -92,23 +125,22 @@ def test_github_source_fetch_partial_error():
         assert "Failed to fetch repos" in str(exc_info.value)
 
 
-def test_github_source_fetch_calls_gh_command():
-    """Test that fetch calls correct gh command."""
-    mock_output = json.dumps([])
+def test_github_source_fetch_calls_github_api():
+    """Test that fetch calls correct GitHub API."""
+    mock_user = MagicMock()
+    mock_user.get_repos.return_value = []
 
-    with patch("subprocess.check_output") as mock_check:
-        mock_check.return_value = mock_output
+    with patch("analytics.data_sources.github.Github") as mock_github:
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_user.return_value = mock_user
+
         source = GitHubSource("testuser")
         source.fetch()
 
-        mock_check.assert_called_once()
-        call_args = mock_check.call_args[0][0]
+        mock_github_instance.get_user.assert_called_once_with("testuser")
+        mock_user.get_repos.assert_called_once()
 
-        assert "gh" in call_args
-        assert "repo" in call_args
-        assert "list" in call_args
-        assert "testuser" in call_args
-        assert "--json" in call_args
 
 
 def test_github_source_username_validation():
