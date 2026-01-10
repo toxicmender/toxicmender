@@ -1,6 +1,5 @@
 import pytest
 from analytics.scoring.impact_score import ImpactScore
-from analytics.exceptions import AnalyticsError
 
 
 def test_impact_score_basic():

@@ -1,7 +1,7 @@
 import pytest
 from analytics.data_sources.github import GitHubSource
 from analytics.exceptions import DataSourceError, ValidationError
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import json
 
 

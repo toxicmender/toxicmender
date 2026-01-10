@@ -1,7 +1,6 @@
 import typer
 from pathlib import Path
 from analytics.pipeline import analyse, collect, visualize, render
-import typer
 from analytics.exceptions import AnalyticsError
 
 app = typer.Typer(

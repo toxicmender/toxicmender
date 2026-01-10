@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from analytics.pipeline.visualize import Visualizer
 from analytics.charts.language import LanguageChart
 

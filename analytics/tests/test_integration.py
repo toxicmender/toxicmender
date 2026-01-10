@@ -3,8 +3,7 @@ Integration tests for the analytics pipeline.
 Tests full workflow: collect -> analyse -> visualize -> render
 """
 import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from analytics.models.repo import RepoStats
 from analytics.pipeline.analyse import Analyser
 from analytics.pipeline.visualize import Visualizer

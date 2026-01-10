@@ -1,7 +1,8 @@
 from analytics.data_sources.base import DataSource
 from analytics.exceptions import DataSourceError
 from analytics.utils.validation import require_non_empty
-import subprocess, json
+import subprocess
+import json
 
 class GitHubSource(DataSource):
     def __init__(self, username: str):
