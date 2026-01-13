@@ -2,8 +2,6 @@
 Unit tests for CategoryChart.
 """
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 from analytics.charts.category import CategoryChart
 from analytics.exceptions import ChartError
 
@@ -68,7 +66,6 @@ def test_category_chart_invalid_directory(tmp_path):
 
 def test_category_chart_read_only_directory(tmp_path):
     """Test CategoryChart with read-only output directory."""
-    import sys
     import platform
     
     # Skip on Windows as os.access behaves differently with permissions

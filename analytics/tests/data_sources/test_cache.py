@@ -3,7 +3,6 @@ Unit tests for CacheDataSource.
 """
 import pytest
 import json
-from pathlib import Path
 from analytics.data_sources.cache import CacheDataSource
 from analytics.exceptions import DataSourceError
 

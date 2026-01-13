@@ -4,7 +4,6 @@ Unit tests for FilesystemDataSource.
 import pytest
 import json
 import csv
-from pathlib import Path
 from analytics.data_sources.filesystem import FilesystemDataSource
 from analytics.exceptions import DataSourceError
 

@@ -1,8 +1,6 @@
 """
 Unit tests for ScaleMetric.
 """
-import pytest
-import math
 from analytics.metrics.scale import ScaleMetric
 from analytics.models.repo import RepoStats
 

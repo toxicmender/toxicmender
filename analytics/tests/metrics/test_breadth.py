@@ -1,7 +1,6 @@
 """
 Unit tests for BreadthMetric.
 """
-import pytest
 from analytics.metrics.breadth import BreadthMetric
 from analytics.models.repo import RepoStats
 

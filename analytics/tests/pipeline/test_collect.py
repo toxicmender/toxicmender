@@ -2,9 +2,8 @@
 Unit tests for DataCollector.
 """
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from analytics.pipeline.collect import DataCollector
-from analytics.models.repo import RepoStats
 from analytics.exceptions import DataSourceError
 
 

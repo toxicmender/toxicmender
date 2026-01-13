@@ -2,7 +2,6 @@
 Unit tests for HeatmapChart.
 """
 import pytest
-from pathlib import Path
 from analytics.charts.heatmap import HeatmapChart
 from analytics.exceptions import ChartError
 

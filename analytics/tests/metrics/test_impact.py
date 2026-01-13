@@ -1,7 +1,6 @@
 """
 Unit tests for ImpactMetric.
 """
-import pytest
 import math
 from analytics.metrics.impact import ImpactMetric
 from analytics.models.repo import RepoStats

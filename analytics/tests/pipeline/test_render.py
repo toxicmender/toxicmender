@@ -4,7 +4,6 @@ Unit tests for ResultRenderer.
 import pytest
 import json
 import csv
-from pathlib import Path
 from analytics.pipeline.render import ResultRenderer
 
 

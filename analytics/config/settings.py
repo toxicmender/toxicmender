@@ -2,7 +2,6 @@
 Configuration settings for the analytics pipeline.
 """
 from pathlib import Path
-from typing import Dict, List
 import os
 
 # Project paths

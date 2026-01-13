@@ -2,7 +2,6 @@
 Unit tests for EfficiencyChart.
 """
 import pytest
-from pathlib import Path
 from analytics.charts.efficiency import EfficiencyChart
 from analytics.exceptions import ChartError
 

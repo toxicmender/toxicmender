@@ -2,7 +2,6 @@
 Unit tests for RepoVsStarsChart.
 """
 import pytest
-from pathlib import Path
 from analytics.charts.repo_vs_stars import RepoVsStarsChart
 from analytics.exceptions import ChartError
 
