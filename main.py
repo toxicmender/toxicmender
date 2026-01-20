@@ -1,3 +1,4 @@
+from typing import Annotated
 import typer
 from pathlib import Path
 from analytics.pipeline import analyse, collect, visualize, render
@@ -14,21 +15,21 @@ app = typer.Typer(
 
 @app.command()
 def collect_data(
-    username: str = typer.Option(..., help="GitHub username"),
-    output: Path = typer.Option(Path("data"), help="Output directory")
+    username: Annotated[str, typer.Option(help="GitHub username")],
+    output: Annotated[Path, typer.Option(help="Output directory")] = Path("data/")
 ):
     """
     Fetch repositories, metadata, and activity data.
     """
     typer.echo("🔍 Collecting data...")
-    collect.run(username=username, output_dir=output)
+    collect.run(username=username, output_dir=output.joinpath(username))
     typer.echo("✅ Data collection complete")
 
 
 @app.command()
 def analyze_data(
-    input_dir: Path = typer.Option(Path("data"), help="Input data directory"),
-    output_dir: Path = typer.Option(Path("data"), help="Output directory")
+    input_dir: Annotated[Path, typer.Option(help="Input data directory")] = Path("data/"),
+    output_dir: Annotated[Path, typer.Option(help="Output directory")] = Path("data/")
 ):
     """
     Compute metrics and normalized scores.
@@ -40,8 +41,8 @@ def analyze_data(
 
 @app.command()
 def visualize_data(
-    data_dir: Path = typer.Option(Path("data"), help="Metrics directory"),
-    charts_dir: Path = typer.Option(Path("charts"), help="Charts output")
+    data_dir: Annotated[Path, typer.Option(help="Metrics directory")] = Path("data/"),
+    charts_dir: Annotated[Path, typer.Option(help="Charts output")] = Path("charts/")
 ):
     """
     Generate charts using matplotlib.
@@ -53,9 +54,9 @@ def visualize_data(
 
 @app.command()
 def render_readme(
-    template: Path = typer.Option(Path("README.template.md")),
-    output: Path = typer.Option(Path("README.md")),
-    data_dir: Path = typer.Option(Path("data"))
+    template: Annotated[Path, typer.Option(help="Template file path")] = Path("README.template.md"),
+    output: Annotated[Path, typer.Option(help="Output file path")] = Path("README.md"),
+    data_dir: Annotated[Path, typer.Option(help="Data directory")] = Path("data/")
 ):
     """
     Render README from template and metrics.
@@ -67,7 +68,7 @@ def render_readme(
 
 @app.command()
 def run(
-    username: str = typer.Option(..., help="GitHub username"),
+    username: Annotated[str, typer.Option(help="GitHub username")]
 ):
     """
     Run full analytics pipeline.

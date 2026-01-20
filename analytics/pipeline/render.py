@@ -2,6 +2,7 @@
 Rendering pipeline stage.
 Outputs analysis results in various formats (JSON, CSV, HTML).
 """
+from analytics.pipeline.base import PipelineStep
 from typing import Dict, Any, List
 from pathlib import Path
 import json
@@ -11,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ResultRenderer:
+class ResultRenderer(PipelineStep):
     """Renders analysis results in multiple output formats."""
 
     SUPPORTED_FORMATS = {'.json', '.csv', '.txt'}
@@ -23,8 +24,22 @@ class ResultRenderer:
         Args:
             output_dir: Directory to write rendered results
         """
+        super().__init__("ResultRenderer")
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def execute(self, results: Dict[str, Any], format: str = 'json', **kwargs) -> Path:
+        """
+        Execute rendering of results.
+
+        Args:
+            results: Analysis results dictionary
+            format: Output format (json, csv, txt)
+
+        Returns:
+            Path to rendered output file
+        """
+        return self.render(results, format)
 
     def render(self, results: Dict[str, Any], format: str = 'json') -> Path:
         """
@@ -163,3 +178,46 @@ class ResultRenderer:
                     f.write(f"{indent_str}{key}: {value}\n")
         else:
             f.write(f"{indent_str}{obj}\n")
+
+
+def run(template: Path, output: Path, data_dir: Path) -> None:
+    """
+    Run README rendering pipeline step.
+
+    Args:
+        template: Path to README template file
+        output: Path to output README file
+        data_dir: Directory containing metrics and data
+    """
+    template = Path(template)
+    output = Path(output)
+    data_dir = Path(data_dir)
+
+    # Load metrics data
+    metrics_file = data_dir / "metrics.json"
+    if not metrics_file.exists():
+        logger.warning(f"Metrics file not found: {metrics_file}")
+        metrics = {}
+    else:
+        with open(metrics_file, 'r', encoding='utf-8') as f:
+            metrics = json.load(f)
+
+    # Load template if it exists
+    if template.exists():
+        with open(template, 'r', encoding='utf-8') as f:
+            template_content = f.read()
+    else:
+        logger.warning(f"Template not found: {template}. Creating basic README.")
+        template_content = "# Analytics Results\n\n{{metrics}}\n"
+
+    # Simple template rendering (replace {{metrics}} with JSON)
+    rendered_content = template_content.replace(
+        '{{metrics}}',
+        json.dumps(metrics, indent=2)
+    )
+
+    # Write output
+    with open(output, 'w', encoding='utf-8') as f:
+        f.write(rendered_content)
+
+    logger.info(f"Rendered README to {output}")

@@ -2,16 +2,21 @@
 Data collection pipeline stage.
 Coordinates fetching data from various sources and preparing it for analysis.
 """
+from analytics.pipeline.base import PipelineStep
 from analytics.data_sources.base import DataSource
+from analytics.data_sources.github import GitHubSource
+from analytics.data_sources.cache import CacheDataSource
 from analytics.models.repo import RepoStats
 from analytics.exceptions import DataSourceError
 from typing import List, Dict, Any
+from pathlib import Path
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
 
-class DataCollector:
+class DataCollector(PipelineStep):
     """Orchestrates data collection from configured sources."""
 
     def __init__(self, sources: List[DataSource]):
@@ -21,7 +26,20 @@ class DataCollector:
         Args:
             sources: List of DataSource implementations to fetch from
         """
+        super().__init__("DataCollector")
         self.sources = sources
+
+    def execute(self, **kwargs) -> List[RepoStats]:
+        """
+        Execute data collection from all sources.
+
+        Returns:
+            List of RepoStats objects
+
+        Raises:
+            DataSourceError: If all sources fail or no sources provided
+        """
+        return self.collect()
 
     def collect(self) -> List[RepoStats]:
         """
@@ -35,7 +53,7 @@ class DataCollector:
         """
         if not self.sources:
             raise DataSourceError("No data sources configured")
-        
+
         all_repos: List[RepoStats] = []
         errors: List[str] = []
 
@@ -121,3 +139,36 @@ class DataCollector:
             forks=int(item.get('forks', item.get('forks_count', 0))),
             languages=item.get('languages', {})
         )
+
+def run(username: str, output_dir: Path = Path("data")) -> None:
+    """
+    Run data collection pipeline step.
+
+    Args:
+        username: GitHub username to collect data for
+        output_dir: Directory to save collected data
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Configure data sources
+    sources = [
+        GitHubSource(username=username),
+        # CacheDataSource(cache_file=output_dir / ".cache")
+    ]
+
+    # Collect data
+    collector = DataCollector(sources=sources)
+    repos = collector.run()
+
+    # Save collected data
+    output_file = output_dir / "repositories.json"
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(
+            [repo.__dict__ for repo in repos],
+            f,
+            indent=2,
+            default=str
+        )
+
+    logger.info(f"Saved {len(repos)} repositories to {output_file}")
