@@ -17,17 +17,27 @@ class GitHubSource(DataSource):
 
             result = []
             for repo in repos:
+                # Get languages with their line counts
+                languages = repo.get_languages()
+
+                # Calculate total LOC from all languages
+                loc = sum(languages.values()) if languages else 1
+
                 result.append({
                     "name": repo.name,
-                    "stargazerCount": repo.stargazers_count
+                    "loc": loc,
+                    "commits": repo.get_commits().totalCount,
+                    "stars": repo.stargazers_count,
+                    "forks": repo.forks_count,
+                    "languages": languages if languages else {}
                 })
 
             return result
         except GithubException as e:
             raise DataSourceError(
-                f"Failed to fetch repos for {self.username}"
+                f"Failed to fetch repos for {self.username} via GitHub API: {e}"
             ) from e
         except Exception as e:
             raise DataSourceError(
-                f"Failed to fetch repos for {self.username}"
+                f"Failed to fetch repos for {self.username} due to unexpected error {e}"
             ) from e
