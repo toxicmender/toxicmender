@@ -16,13 +16,15 @@ app = typer.Typer(
 @app.command()
 def collect_data(
     username: Annotated[str, typer.Option(help="GitHub username")],
-    output: Annotated[Path, typer.Option(help="Output directory")] = Path("data/")
+    output: Annotated[Path, typer.Option(help="Output directory")] = Path("data/"),
+    token: Annotated[str, typer.Option(help="GitHub personal access token (optional, for higher rate limits)")] = None
 ):
     """
     Fetch repositories, metadata, and activity data.
+    Caches each repo individually to handle rate limits and resume progress.
     """
     typer.echo("🔍 Collecting data...")
-    collect.run(username=username, output_dir=output.joinpath(username))
+    collect.run(username=username, output_dir=output.joinpath(username), github_token=token)
     typer.echo("✅ Data collection complete")
 
 

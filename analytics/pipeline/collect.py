@@ -8,7 +8,7 @@ from analytics.data_sources.github import GitHubSource
 from analytics.data_sources.cache import CacheDataSource
 from analytics.models.repo import RepoStats
 from analytics.exceptions import DataSourceError
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pathlib import Path
 import logging
 import json
@@ -140,21 +140,25 @@ class DataCollector(PipelineStep):
             languages=item.get('languages', {})
         )
 
-def run(username: str, output_dir: Path = Path("data")) -> None:
+def run(username: str, output_dir: Path = Path("data"), github_token: Optional[str] = None) -> None:
     """
     Run data collection pipeline step.
 
     Args:
         username: GitHub username to collect data for
         output_dir: Directory to save collected data
+        github_token: Optional GitHub personal access token for higher rate limits
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Configure data sources
+    cache_dir = output_dir / "repos_cache"
+
+    # Configure data sources - GitHubSource now handles its own caching
     sources = [
-        GitHubSource(username=username),
-        # CacheDataSource(cache_file=output_dir / ".cache")
+        GitHubSource(username=username, cache_dir=cache_dir, token=github_token),
+        # Fallback to cache directory if GitHub fetch fails
+        CacheDataSource(cache_dir=cache_dir)
     ]
 
     # Collect data

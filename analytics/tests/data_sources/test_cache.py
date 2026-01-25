@@ -45,7 +45,9 @@ def test_cache_data_source_fetch_with_data():
     cache.set_cache("repos", test_data)
 
     result = cache.fetch()
-    assert "repos" in result
+    # fetch() returns list of values when cache is dict
+    assert len(result) == 1
+    assert result[0] == test_data
 
 
 def test_cache_data_source_clear_cache():
@@ -130,9 +132,11 @@ def test_cache_data_source_multiple_operations():
     cache.set_cache("data1", {"value": 100})
     cache.set_cache("data2", {"value": 200})
 
-    # Fetch and verify
+    # Fetch and verify - returns list of values
     result = cache.fetch()
     assert len(result) == 2
+    assert {"value": 100} in result
+    assert {"value": 200} in result
 
     # Clear and verify empty
     cache.clear_cache()
@@ -142,7 +146,8 @@ def test_cache_data_source_multiple_operations():
     # Add new data
     cache.set_cache("data3", {"value": 300})
     result = cache.fetch()
-    assert "data3" in result
+    assert len(result) == 1
+    assert {"value": 300} in result
 
 
 def test_cache_data_source_complex_data():
@@ -161,5 +166,102 @@ def test_cache_data_source_complex_data():
 
     cache.set_cache("analysis", complex_data)
     result = cache.fetch()
-    assert result["analysis"]["repos"][0]["name"] == "repo1"
-    assert result["analysis"]["summary"]["avg_stars"] == 75
+    # fetch() returns list of values, so result[0] is the complex_data
+    assert len(result) == 1
+    assert result[0]["repos"][0]["name"] == "repo1"
+    assert result[0]["summary"]["avg_stars"] == 75
+
+def test_cache_data_source_init_with_cache_dir(tmp_path):
+    """Test CacheDataSource initialization with cache directory."""
+    cache_dir = tmp_path / "cache_dir"
+    cache_dir.mkdir()
+
+    cache = CacheDataSource(cache_dir=cache_dir)
+    assert cache.cache_dir == cache_dir
+    assert isinstance(cache.cache, list)
+    assert len(cache.cache) == 0
+
+
+def test_cache_data_source_load_from_directory(tmp_path):
+    """Test loading cache from directory of JSON files."""
+    cache_dir = tmp_path / "repos_cache"
+    cache_dir.mkdir()
+
+    # Create mock repo cache files
+    repo1_data = {
+        "name": "repo1",
+        "loc": 5000,
+        "commits": 100,
+        "stars": 50,
+        "forks": 10,
+        "languages": {"Python": 5000}
+    }
+    repo2_data = {
+        "name": "repo2",
+        "loc": 3000,
+        "commits": 75,
+        "stars": 30,
+        "forks": 5,
+        "languages": {"JavaScript": 3000}
+    }
+
+    with open(cache_dir / "repo1.json", 'w') as f:
+        json.dump(repo1_data, f)
+    with open(cache_dir / "repo2.json", 'w') as f:
+        json.dump(repo2_data, f)
+
+    # Load cache from directory
+    cache = CacheDataSource(cache_dir=cache_dir)
+    data = cache.fetch()
+
+    assert len(data) == 2
+    assert any(repo["name"] == "repo1" for repo in data)
+    assert any(repo["name"] == "repo2" for repo in data)
+
+
+def test_cache_data_source_directory_with_corrupt_file(tmp_path):
+    """Test loading cache directory with a corrupt file."""
+    cache_dir = tmp_path / "repos_cache"
+    cache_dir.mkdir()
+
+    # Create good and corrupt files
+    with open(cache_dir / "good.json", 'w') as f:
+        json.dump({"name": "good_repo"}, f)
+
+    with open(cache_dir / "bad.json", 'w') as f:
+        f.write("{ invalid json")
+
+    # Should load successfully, skipping corrupt file
+    cache = CacheDataSource(cache_dir=cache_dir)
+    data = cache.fetch()
+
+    assert len(data) == 1
+    assert data[0]["name"] == "good_repo"
+
+
+def test_cache_data_source_fetch_returns_list_for_directory(tmp_path):
+    """Test that fetch returns list when loading from directory."""
+    cache_dir = tmp_path / "repos_cache"
+    cache_dir.mkdir()
+
+    repo_data = {"name": "test_repo", "stars": 100}
+    with open(cache_dir / "test.json", 'w') as f:
+        json.dump(repo_data, f)
+
+    cache = CacheDataSource(cache_dir=cache_dir)
+    result = cache.fetch()
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["name"] == "test_repo"
+
+
+def test_cache_data_source_empty_directory(tmp_path):
+    """Test loading from empty cache directory."""
+    cache_dir = tmp_path / "empty_cache"
+    cache_dir.mkdir()
+
+    cache = CacheDataSource(cache_dir=cache_dir)
+
+    with pytest.raises(DataSourceError):
+        cache.fetch()
