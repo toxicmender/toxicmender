@@ -21,14 +21,11 @@ class BreadthMetric(Metric):
             repos: List of repository statistics
 
         Returns:
-            MetricResult with breadth values for each repository
+            MetricResult with 'language_count' as list of language counts
         """
-        values = {
-            repo.name: len(repo.languages)
-            for repo in repos
-        }
+        language_counts = [float(len(repo.languages)) for repo in repos]
 
-        return MetricResult(
-            name=self.name,
-            values={k: float(v) for k, v in values.items()}
-        )
+        values = {
+            "language_count": language_counts
+        }
+        return self._create_result(repos, values)

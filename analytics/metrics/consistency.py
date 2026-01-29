@@ -22,9 +22,9 @@ class ConsistencyMetric(Metric):
             repos: List of repository statistics
 
         Returns:
-            MetricResult with consistency scores
+            MetricResult with 'consistency_score' as list of scores
         """
-        values = {}
+        consistency_scores = []
 
         for repo in repos:
             # Consistency as variance reduction metric
@@ -36,9 +36,9 @@ class ConsistencyMetric(Metric):
             else:
                 consistency_score = 0.0
 
-            values[repo.name] = consistency_score
+            consistency_scores.append(consistency_score)
 
-        return MetricResult(
-            name=self.name,
-            values=values
-        )
+        values = {
+            "consistency_score": consistency_scores
+        }
+        return self._create_result(repos, values)

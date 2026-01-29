@@ -24,9 +24,10 @@ def test_scale_metric_balanced_repo():
     metric = ScaleMetric()
     result = metric.compute([repo])
 
-    assert "medium-repo" in result.values
-    assert isinstance(result.values["medium-repo"], float)
-    assert result.values["medium-repo"] > 0.0
+    assert "medium-repo" in result
+    value = result.get_value_by_repo("medium-repo", "scale_score")
+    assert isinstance(value, float)
+    assert value > 0.0
 
 
 def test_scale_metric_small_repo():
@@ -43,7 +44,7 @@ def test_scale_metric_small_repo():
     result = metric.compute([repo])
 
     # Should have lower scale than larger repo
-    assert result.values["tiny-repo"] > 0.0
+    assert result.get_value_by_repo("tiny-repo", "scale_score") > 0.0
 
 
 def test_scale_metric_large_repo():
@@ -60,7 +61,7 @@ def test_scale_metric_large_repo():
     result = metric.compute([repo])
 
     # Should have high scale value
-    assert result.values["huge-repo"] > 0.0
+    assert result.get_value_by_repo("huge-repo", "scale_score") > 0.0
 
 
 def test_scale_metric_multiple_repos():
@@ -94,10 +95,10 @@ def test_scale_metric_multiple_repos():
     metric = ScaleMetric()
     result = metric.compute(repos)
 
-    assert len(result.values) == 3
+    assert len(result.repo_names) == 3
     # Larger repos should have higher scale
-    assert result.values["large"] > result.values["medium"]
-    assert result.values["medium"] > result.values["small"]
+    assert result.get_value_by_repo("large", "scale_score") > result.get_value_by_repo("medium", "scale_score")
+    assert result.get_value_by_repo("medium", "scale_score") > result.get_value_by_repo("small", "scale_score")
 
 
 def test_scale_metric_minimal_values():
@@ -115,7 +116,7 @@ def test_scale_metric_minimal_values():
     result = metric.compute([repo])
 
     # Very small but positive scale value
-    assert result.values["minimal-repo"] >= 0.0
+    assert result.get_value_by_repo("minimal-repo", "scale_score") >= 0.0
 
 
 def test_scale_metric_single_language():
@@ -132,7 +133,7 @@ def test_scale_metric_single_language():
     result = metric.compute([repo])
 
     # Should compute scale normally
-    assert result.values["single-lang"] > 0.0
+    assert result.get_value_by_repo("single-lang", "scale_score") > 0.0
 
 
 def test_scale_metric_many_languages():
@@ -149,7 +150,7 @@ def test_scale_metric_many_languages():
     result = metric.compute([repo])
 
     # Should have higher scale due to more languages
-    assert result.values["polyglot"] > 0.0
+    assert result.get_value_by_repo("polyglot", "scale_score") > 0.0
 
 
 def test_scale_metric_empty_list():
@@ -158,7 +159,8 @@ def test_scale_metric_empty_list():
     result = metric.compute([])
 
     assert result.name == "scale"
-    assert result.values == {}
+    assert len(result.repo_names) == 0
+    assert result.values["scale_score"] == []
 
 
 def test_scale_metric_metric_components():
@@ -186,8 +188,8 @@ def test_scale_metric_metric_components():
     result = metric.compute([repo_loc_focused, repo_commit_focused])
 
     # Both should have positive scale despite being unbalanced
-    assert result.values["loc-focused"] > 0.0
-    assert result.values["commit-focused"] > 0.0
+    assert result.get_value_by_repo("loc-focused", "scale_score") > 0.0
+    assert result.get_value_by_repo("commit-focused", "scale_score") > 0.0
 
 
 def test_scale_metric_returns_floats():
@@ -203,4 +205,4 @@ def test_scale_metric_returns_floats():
     metric = ScaleMetric()
     result = metric.compute([repo])
 
-    assert isinstance(result.values["test-repo"], float)
+    assert isinstance(result.get_value_by_repo("test-repo", "scale_score"), float)

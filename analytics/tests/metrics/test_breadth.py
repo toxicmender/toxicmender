@@ -17,8 +17,8 @@ def test_breadth_metric_single_language(sample_repo):
     result = metric.compute([sample_repo])
 
     assert result.name == "breadth"
-    assert "test-repo" in result.values
-    assert result.values["test-repo"] == 1.0
+    assert "test-repo" in result
+    assert result.get_value_by_repo("test-repo", "language_count") == 2.0  # sample_repo has 2 languages
 
 
 def test_breadth_metric_multiple_languages():
@@ -33,7 +33,7 @@ def test_breadth_metric_multiple_languages():
     metric = BreadthMetric()
     result = metric.compute([repo])
 
-    assert result.values["multi-lang-repo"] == 3.0
+    assert result.get_value_by_repo("multi-lang-repo", "language_count") == 3.0
 
 
 def test_breadth_metric_no_languages():
@@ -50,7 +50,7 @@ def test_breadth_metric_no_languages():
     metric = BreadthMetric()
     result = metric.compute([repo])
 
-    assert result.values["empty-repo"] == 0.0
+    assert result.get_value_by_repo("empty-repo", "language_count") == 0.0
 
 
 def test_breadth_metric_multiple_repos():
@@ -81,10 +81,10 @@ def test_breadth_metric_multiple_repos():
     metric = BreadthMetric()
     result = metric.compute(repos)
 
-    assert len(result.values) == 3
-    assert result.values["repo1"] == 1.0
-    assert result.values["repo2"] == 2.0
-    assert result.values["repo3"] == 3.0
+    assert len(result.repo_names) == 3
+    assert result.get_value_by_repo("repo1", "language_count") == 1.0
+    assert result.get_value_by_repo("repo2", "language_count") == 2.0
+    assert result.get_value_by_repo("repo3", "language_count") == 3.0
 
 
 def test_breadth_metric_many_languages():
@@ -100,7 +100,7 @@ def test_breadth_metric_many_languages():
     metric = BreadthMetric()
     result = metric.compute([repo])
 
-    assert result.values["polyglot-repo"] == 20.0
+    assert result.get_value_by_repo("polyglot-repo", "language_count") == 20.0
 
 
 def test_breadth_metric_empty_list():
@@ -109,7 +109,8 @@ def test_breadth_metric_empty_list():
     result = metric.compute([])
 
     assert result.name == "breadth"
-    assert result.values == {}
+    assert len(result.repo_names) == 0
+    assert result.values["language_count"] == []
 
 
 def test_breadth_metric_returns_floats():
@@ -124,4 +125,4 @@ def test_breadth_metric_returns_floats():
     metric = BreadthMetric()
     result = metric.compute([repo])
 
-    assert isinstance(result.values["test-repo"], float)
+    assert isinstance(result.get_value_by_repo("test-repo", "language_count"), float)

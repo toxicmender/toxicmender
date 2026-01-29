@@ -25,10 +25,10 @@ def test_impact_metric_with_stars():
     metric = ImpactMetric()
     result = metric.compute([repo])
 
-    assert "popular-repo" in result.values
+    assert "popular-repo" in result
     # log1p(100 + 0*0.5) = log1p(100) ≈ 4.615
     expected = math.log1p(100)
-    assert abs(result.values["popular-repo"] - expected) < 0.001
+    assert abs(result.get_value_by_repo("popular-repo", "impact_score") - expected) < 0.001
 
 
 def test_impact_metric_with_forks():
@@ -46,7 +46,7 @@ def test_impact_metric_with_forks():
 
     # log1p(50 + 20*0.5) = log1p(60)
     expected = math.log1p(50 + 20 * 0.5)
-    assert abs(result.values["forked-repo"] - expected) < 0.001
+    assert abs(result.get_value_by_repo("forked-repo", "impact_score") - expected) < 0.001
 
 
 def test_impact_metric_no_engagement():
@@ -63,7 +63,7 @@ def test_impact_metric_no_engagement():
     result = metric.compute([repo])
 
     # log1p(0 + 0*0.5) = log1p(0) = 0
-    assert result.values["unpopular-repo"] == 0.0
+    assert result.get_value_by_repo("unpopular-repo", "impact_score") == 0.0
 
 
 def test_impact_metric_multiple_repos():
@@ -97,10 +97,10 @@ def test_impact_metric_multiple_repos():
     metric = ImpactMetric()
     result = metric.compute(repos)
 
-    assert len(result.values) == 3
+    assert len(result.repo_names) == 3
     # Repo2 should have highest impact
-    assert result.values["repo2"] > result.values["repo1"]
-    assert result.values["repo1"] > result.values["repo3"]
+    assert result.get_value_by_repo("repo2", "impact_score") > result.get_value_by_repo("repo1", "impact_score")
+    assert result.get_value_by_repo("repo1", "impact_score") > result.get_value_by_repo("repo3", "impact_score")
 
 
 def test_impact_metric_forks_weighted_less():
@@ -126,7 +126,7 @@ def test_impact_metric_forks_weighted_less():
     result = metric.compute([repo_many_stars, repo_many_forks])
 
     # More stars should yield higher impact than same number of forks
-    assert result.values["many-stars"] > result.values["many-forks"]
+    assert result.get_value_by_repo("many-stars", "impact_score") > result.get_value_by_repo("many-forks", "impact_score")
 
 
 def test_impact_metric_empty_list():
@@ -135,7 +135,8 @@ def test_impact_metric_empty_list():
     result = metric.compute([])
 
     assert result.name == "impact"
-    assert result.values == {}
+    assert len(result.repo_names) == 0
+    assert result.values["impact_score"] == []
 
 
 def test_impact_metric_large_numbers():
@@ -153,7 +154,7 @@ def test_impact_metric_large_numbers():
 
     # log1p(100000 + 10000*0.5) = log1p(105000)
     expected = math.log1p(100000 + 10000 * 0.5)
-    assert abs(result.values["mega-popular"] - expected) < 0.001
+    assert abs(result.get_value_by_repo("mega-popular", "impact_score") - expected) < 0.001
 
 
 def test_impact_metric_returns_floats():
@@ -169,4 +170,4 @@ def test_impact_metric_returns_floats():
     metric = ImpactMetric()
     result = metric.compute([repo])
 
-    assert isinstance(result.values["test-repo"], float)
+    assert isinstance(result.get_value_by_repo("test-repo", "impact_score"), float)

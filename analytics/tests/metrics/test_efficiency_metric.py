@@ -6,7 +6,9 @@ from analytics.models.repo import RepoStats
 def test_efficiency_calculation(sample_repo):
     metric = EfficiencyMetric()
     result = metric.compute([sample_repo])
-    assert result.values["test-repo"] == 150.0
+    # Use new list-based structure
+    assert "test-repo" in result
+    assert result.get_value_by_repo("test-repo", "loc_per_commit") == 150.0
 
 
 def test_efficiency_zero_commits():

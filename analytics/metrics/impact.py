@@ -22,17 +22,17 @@ class ImpactMetric(Metric):
             repos: List of repository statistics
 
         Returns:
-            MetricResult with impact scores
+            MetricResult with 'impact_score' as list of engagement scores
         """
-        values = {}
+        impact_scores = []
 
         for repo in repos:
             # Impact formula: logarithmic scale of (stars * fork_influence)
             # Forks weighted less than stars as they're less indicative of quality
             impact_score = math.log1p(repo.stars + repo.forks * 0.5)
-            values[repo.name] = impact_score
+            impact_scores.append(impact_score)
 
-        return MetricResult(
-            name=self.name,
-            values=values
-        )
+        values = {
+            "impact_score": impact_scores
+        }
+        return self._create_result(repos, values)

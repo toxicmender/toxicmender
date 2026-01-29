@@ -146,9 +146,17 @@ def run(input_dir: Path, output_dir: Path) -> None:
     analyser = Analyser(metrics=metrics)
     results = analyser.run(repos=repos)
 
+    # Convert MetricResult objects to dictionaries for JSON serialization
+    serializable_results = {}
+    for metric_name, metric_result in results.items():
+        if hasattr(metric_result, 'to_dict'):
+            serializable_results[metric_name] = metric_result.to_dict()
+        else:
+            serializable_results[metric_name] = metric_result
+
     # Save analysis results
     output_file = output_dir / "metrics.json"
     with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(results, f, indent=2, default=str)
+        json.dump(serializable_results, f, indent=2, default=str)
 
     logger.info(f"Saved analysis results to {output_file}")

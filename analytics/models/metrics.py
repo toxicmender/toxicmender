@@ -1,9 +1,45 @@
 from pydantic import BaseModel, Field
-from typing import Dict
+from typing import Dict, List, Union
 
 class MetricResult(BaseModel):
     name: str
-    values: Dict[str, float]
+    values: Dict[str, Union[List[int], List[float], int, float]]
+    repo_names: List[str] = Field(default_factory=list)
+
+    def to_dict(self) -> Dict:
+        """Convert to dictionary format for JSON serialization."""
+        return {
+            "name": self.name,
+            "values": self.values,
+            "repo_names": self.repo_names
+        }
+
+    def get_value_by_repo(self, repo_name: str, dimension_key: str = None) -> Union[float, int, None]:
+        """
+        Get value for a specific repository (backward compatibility helper).
+
+        Args:
+            repo_name: Name of the repository
+            dimension_key: Specific dimension key to retrieve (if None, gets first dimension)
+
+        Returns:
+            Value for the repository or None if not found
+        """
+        try:
+            repo_index = self.repo_names.index(repo_name)
+
+            # If dimension_key not specified, use first available dimension
+            if dimension_key is None:
+                dimension_key = next(iter(self.values.keys()))
+
+            values_list = self.values[dimension_key]
+            return values_list[repo_index]
+        except (ValueError, IndexError, KeyError):
+            return None
+
+    def __contains__(self, item: str) -> bool:
+        """Check if a repo_name exists (backward compatibility)."""
+        return item in self.repo_names
 
 class ScoreResult(BaseModel):
     score: float = Field(ge=0, le=100)

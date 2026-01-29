@@ -22,9 +22,9 @@ class ScaleMetric(Metric):
             repos: List of repository statistics
 
         Returns:
-            MetricResult with scale scores
+            MetricResult with 'scale_score' as list of scale values
         """
-        values = {}
+        scale_scores = []
 
         for repo in repos:
             # Scale score combines multiple factors
@@ -39,9 +39,9 @@ class ScaleMetric(Metric):
 
             # Combined scale with equal weighting
             scale_score = (loc_score + commit_score + language_score) / 3
-            values[repo.name] = scale_score
+            scale_scores.append(scale_score)
 
-        return MetricResult(
-            name=self.name,
-            values=values
-        )
+        values = {
+            "scale_score": scale_scores
+        }
+        return self._create_result(repos, values)

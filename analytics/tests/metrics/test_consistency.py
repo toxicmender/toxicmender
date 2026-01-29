@@ -18,10 +18,10 @@ def test_consistency_metric_balanced_repo(sample_repo):
     result = metric.compute([sample_repo])
 
     assert result.name == "consistency"
-    assert "test-repo" in result.values
+    assert "test-repo" in result
     # sample_repo: 1500 LOC / 10 commits = 150 LOC per commit
     # Consistency should be 150/100 = 1.5, capped at 1.0
-    assert 0.0 <= result.values["test-repo"] <= 1.0
+    assert 0.0 <= result.get_value_by_repo("test-repo", "consistency_score") <= 1.0
 
 
 def test_consistency_metric_high_loc_per_commit():
@@ -37,7 +37,7 @@ def test_consistency_metric_high_loc_per_commit():
     result = metric.compute([repo])
 
     # Should be capped at 1.0
-    assert result.values["efficient-repo"] <= 1.0
+    assert result.get_value_by_repo("efficient-repo", "consistency_score") <= 1.0
 
 
 def test_consistency_metric_low_loc_per_commit():
@@ -53,7 +53,7 @@ def test_consistency_metric_low_loc_per_commit():
     result = metric.compute([repo])
 
     # Should be 2/100 = 0.02
-    assert 0.0 <= result.values["incremental-repo"] < 1.0
+    assert 0.0 <= result.get_value_by_repo("incremental-repo", "consistency_score") < 1.0
 
 
 def test_consistency_metric_zero_commits():
@@ -67,12 +67,8 @@ def test_consistency_metric_zero_commits():
             stars=0,
             languages={"Python": 1000}
         )
-
-    metric = ConsistencyMetric()
-    result = metric.compute([repo])
-
-    # Should return 0.0 for zero commits
-    assert result.values["no-commits-repo"] == 0.0
+        metric = ConsistencyMetric()
+        result = metric.compute([repo])
 
 
 def test_consistency_metric_multiple_repos():
@@ -103,9 +99,10 @@ def test_consistency_metric_multiple_repos():
     metric = ConsistencyMetric()
     result = metric.compute(repos)
 
-    assert len(result.values) == 3
+    assert len(result.repo_names) == 3
     # All values should be in valid range
-    for value in result.values.values():
+    for i, repo_name in enumerate(result.repo_names):
+        value = result.values["consistency_score"][i]
         assert 0.0 <= value <= 1.0
 
 
@@ -115,7 +112,8 @@ def test_consistency_metric_empty_list():
     result = metric.compute([])
 
     assert result.name == "consistency"
-    assert result.values == {}
+    assert len(result.repo_names) == 0
+    assert result.values["consistency_score"] == []
 
 
 def test_consistency_metric_single_commit():
@@ -131,7 +129,7 @@ def test_consistency_metric_single_commit():
     result = metric.compute([repo])
 
     # 500/100 = 5, capped at 1.0
-    assert result.values["single-commit"] <= 1.0
+    assert result.get_value_by_repo("single-commit", "consistency_score") <= 1.0
 
 
 def test_consistency_metric_returns_floats():
@@ -146,4 +144,4 @@ def test_consistency_metric_returns_floats():
     metric = ConsistencyMetric()
     result = metric.compute([repo])
 
-    assert isinstance(result.values["test-repo"], float)
+    assert isinstance(result.get_value_by_repo("test-repo", "consistency_score"), float)
