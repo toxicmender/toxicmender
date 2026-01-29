@@ -4,6 +4,14 @@ Computes metrics and normalized scores on collected repository data.
 """
 from analytics.pipeline.base import PipelineStep
 from analytics.models.repo import RepoStats
+from analytics.metrics import (
+    LOCMetric,
+    EfficiencyMetric,
+    BreadthMetric,
+    ConsistencyMetric,
+    ImpactMetric,
+    ScaleMetric,
+)
 from typing import List, Dict, Any
 from pathlib import Path
 import logging
@@ -125,10 +133,15 @@ def run(input_dir: Path, output_dir: Path) -> None:
         for repo in repos_data
     ]
 
-    # TODO: Load and configure metrics
-    # For now, create analyzer with empty metrics list
-    # This should be populated with actual metric instances
-    metrics = []
+    # Load and configure metrics
+    metrics = [
+        LOCMetric(),
+        EfficiencyMetric(),
+        BreadthMetric(),
+        ConsistencyMetric(),
+        ImpactMetric(),
+        ScaleMetric(),
+    ]
 
     analyser = Analyser(metrics=metrics)
     results = analyser.run(repos=repos)
