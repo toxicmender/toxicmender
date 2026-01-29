@@ -12,6 +12,8 @@ from analytics.metrics import (
     ImpactMetric,
     ScaleMetric,
 )
+from analytics.utils.language_filter import load_language_filters, filter_repos_list
+from analytics.config.settings import LANGUAGE_FILTER_CONFIG
 from typing import List, Dict, Any
 from pathlib import Path
 import logging
@@ -132,6 +134,25 @@ def run(input_dir: Path, output_dir: Path) -> None:
         )
         for repo in repos_data
     ]
+
+    # Apply language filtering if configured
+    filter_config_path = LANGUAGE_FILTER_CONFIG
+    if filter_config_path.exists():
+        try:
+            logger.info("Loading language filter configuration...")
+            filter_config = load_language_filters(filter_config_path)
+
+            if filter_config.get('filter_enabled', True):
+                logger.info("Applying language filters to repositories...")
+                repos = filter_repos_list(repos, filter_config)
+                logger.info(f"Language filtering complete. {len(repos)} repositories retained.")
+            else:
+                logger.info("Language filtering disabled in configuration")
+        except Exception as e:
+            logger.warning(f"Failed to apply language filtering: {e}")
+            logger.warning("Continuing analysis without filtering")
+    else:
+        logger.info(f"Language filter config not found at {filter_config_path}, skipping filtering")
 
     # Load and configure metrics
     metrics = [

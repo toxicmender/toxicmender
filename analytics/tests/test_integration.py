@@ -231,3 +231,78 @@ def test_pipeline_full_workflow_simulation(sample_repos, tmp_path):
     assert len(final_scores) == 3
     assert all(0 <= score <= 1 for score in final_scores.values())
     assert (tmp_path / "languages.svg").exists()
+
+
+def test_language_filtering_integration(tmp_path):
+    """Test that language filtering is applied during analysis."""
+    from analytics.utils.language_filter import filter_repos_list
+
+    # Create repos with various languages including ones to be filtered
+    repos = [
+        RepoStats(
+            name="web-project",
+            loc=2000,
+            commits=50,
+            stars=10,
+            languages={"Python": 1000, "HTML": 500, "CSS": 300, "JavaScript": 200}
+        ),
+        RepoStats(
+            name="notebook-project",
+            loc=1500,
+            commits=20,
+            stars=5,
+            languages={"Jupyter Notebook": 1000, "Python": 500}
+        ),
+        RepoStats(
+            name="docs-only",
+            loc=500,
+            commits=10,
+            stars=0,
+            languages={"HTML": 300, "CSS": 200}
+        ),
+        RepoStats(
+            name="code-project",
+            loc=3000,
+            commits=100,
+            stars=50,
+            languages={"Python": 2000, "Go": 1000}
+        )
+    ]
+
+    # Apply filtering
+    config = {
+        'filter_enabled': True,
+        'excluded_languages': ['HTML', 'CSS', 'Jupyter Notebook'],
+        'minimum_language_loc': 0,
+        'remove_empty_repos': True,
+        'case_sensitive': False
+    }
+
+    filtered_repos = filter_repos_list(repos, config)
+
+    # Verify filtering results
+    assert len(filtered_repos) == 3  # docs-only should be removed
+
+    # Check web-project was filtered correctly
+    web_proj = next(r for r in filtered_repos if r.name == "web-project")
+    assert 'Python' in web_proj.languages
+    assert 'JavaScript' in web_proj.languages
+    assert 'HTML' not in web_proj.languages
+    assert 'CSS' not in web_proj.languages
+    assert web_proj.loc == 1200  # 1000 + 200
+    assert web_proj.original_loc == 2000
+
+    # Check notebook-project was filtered
+    notebook_proj = next(r for r in filtered_repos if r.name == "notebook-project")
+    assert 'Python' in notebook_proj.languages
+    assert 'Jupyter Notebook' not in notebook_proj.languages
+    assert notebook_proj.loc == 500
+
+    # Check code-project was unchanged
+    code_proj = next(r for r in filtered_repos if r.name == "code-project")
+    assert len(code_proj.languages) == 2
+    assert code_proj.loc == 3000
+
+    # Verify docs-only was removed
+    assert not any(r.name == "docs-only" for r in filtered_repos)
+

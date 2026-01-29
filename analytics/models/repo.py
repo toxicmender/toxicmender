@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt
-from typing import Dict
+from typing import Dict, Optional, List
 
 class RepoStats(BaseModel):
     name: str
@@ -8,6 +8,9 @@ class RepoStats(BaseModel):
     stars: NonNegativeInt = 0
     forks: NonNegativeInt = 0
     languages: Dict[str, PositiveInt]
+    # Optional tracking fields for language filtering
+    original_loc: Optional[PositiveInt] = None  # LOC before filtering
+    filtered_languages: Optional[List[str]] = None  # Languages that were filtered out
 
     class Config:
         frozen = True

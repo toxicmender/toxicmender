@@ -1,0 +1,53 @@
+# Language filtering configuration
+# Specify which languages to exclude from analysis to focus on actual code
+# rather than markup, documentation, or configuration files
+
+# Main exclusion list
+excluded_languages:
+  # Markup & Styling
+  - HTML
+  - CSS
+  - SCSS
+  - Sass
+  - Less
+
+  # Documentation & Notebooks
+  - Jupyter Notebook
+  - Markdown
+  - reStructuredText
+  - AsciiDoc
+  - TeX
+
+  # Data & Config formats
+  - JSON
+  - YAML
+  - TOML
+  - XML
+  - INI
+
+  # Template languages
+  - Smarty
+  - Handlebars
+  - EJS
+  - Jinja
+  - Liquid
+  - Mustache
+
+  # Build & Config
+  - Makefile
+  - CMake
+  - Dockerfile
+
+# Global toggle to enable/disable filtering
+filter_enabled: true
+
+# Minimum LOC threshold per language in a repository
+# Languages with fewer LOC than this will be excluded
+# Set to 0 to disable this filter
+minimum_language_loc: 0
+
+# Remove repositories that have zero LOC after filtering
+remove_empty_repos: true
+
+# Case-sensitive matching (recommended: false for flexibility)
+case_sensitive: false
