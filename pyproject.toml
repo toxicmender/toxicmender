@@ -14,8 +14,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.19.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
+    "types-pyyaml>=6.0.12.20250915",
 ]
 
 [tool.ruff]
@@ -96,6 +98,34 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+
+# Gradually enable strict checking per module
+[[tool.mypy.overrides]]
+module = [
+    "analytics.models.repo",
+    "analytics.models.time_series",
+    "analytics.exceptions",
+    "analytics.charts.base",
+    "analytics.charts.category",
+    "analytics.charts.repo_vs_stars",
+    "analytics.normalisation.minmax",
+    "analytics.scoring.impact_score",
+    "analytics.utils.validation",
+    "analytics.config.auth",
+    "analytics.config.settings",
+]
+disallow_untyped_defs = true
 
 [tool.uv.workspace]
 members = [

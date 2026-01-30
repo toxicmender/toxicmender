@@ -4,7 +4,7 @@ matplotlib.use('Agg')  # Use non-interactive backend for testing
 from analytics.models.repo import RepoStats
 
 @pytest.fixture
-def sample_repo():
+def sample_repo() -> RepoStats:
     return RepoStats(
         name="test-repo",
         loc=1500,

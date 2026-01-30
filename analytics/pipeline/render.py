@@ -17,7 +17,7 @@ class ResultRenderer(PipelineStep):
 
     SUPPORTED_FORMATS = {'.json', '.csv', '.txt'}
 
-    def __init__(self, output_dir: Path):
+    def __init__(self, output_dir: Path) -> None:
         """
         Initialize result renderer.
 
@@ -25,7 +25,7 @@ class ResultRenderer(PipelineStep):
             output_dir: Directory to write rendered results
         """
         super().__init__("ResultRenderer")
-        self.output_dir = Path(output_dir)
+        self.output_dir: Path = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def execute(self, results: Dict[str, Any], format: str = 'json', **kwargs) -> Path:
@@ -155,7 +155,7 @@ class ResultRenderer(PipelineStep):
 
         return rows
 
-    def _write_dict_to_file(self, f, obj: Any, indent: int = 0) -> None:
+    def _write_dict_to_file(self, f: Any, obj: Any, indent: int = 0) -> None:
         """Recursively write dictionary to file with formatting."""
         indent_str = "  " * indent
 

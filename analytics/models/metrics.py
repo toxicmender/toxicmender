@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 class MetricResult(BaseModel):
     model_config = {'frozen': False}
@@ -24,7 +24,7 @@ class MetricResult(BaseModel):
             "repo_names": self.repo_names
         }
 
-    def get_value_by_repo(self, repo_name: str, dimension_key: str = None) -> Union[float, int, None]:
+    def get_value_by_repo(self, repo_name: str, dimension_key: Optional[str] = None) -> Union[float, int, None]:
         """
         Get value for a specific repository (backward compatibility helper).
 

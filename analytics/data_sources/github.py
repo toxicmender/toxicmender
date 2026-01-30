@@ -2,7 +2,8 @@ from analytics.data_sources.base import DataSource
 from analytics.exceptions import DataSourceError
 from analytics.utils.validation import require_non_empty
 from analytics.config.auth import get_github_token
-from github import Github, GithubException, RateLimitExceededException
+from github import Github, Auth, GithubException, RateLimitExceededException
+from github.Repository import Repository
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 import json
@@ -29,7 +30,9 @@ class GitHubSource(DataSource):
         if token is None:
             token = get_github_token()
 
-        self.client = Github(token) if token else Github()
+        # Use Auth.Token for PyGithub v2.0+ compatibility
+        auth = Auth.Token(token) if token else None
+        self.client = Github(auth=auth)
         self.cache_dir = cache_dir or Path(f"data/{username}/repos_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,7 +94,7 @@ class GitHubSource(DataSource):
                 f"Failed to fetch repos for {self.username} due to unexpected error {e}"
             ) from e
 
-    def _fetch_or_load_repo(self, repo) -> Dict[str, Any]:
+    def _fetch_or_load_repo(self, repo: Repository) -> Dict[str, Any]:
         """
         Fetch repo data or load from cache if valid.
 
@@ -126,7 +129,7 @@ class GitHubSource(DataSource):
 
         return repo_data
 
-    def _fetch_repo_data(self, repo) -> Dict[str, Any]:
+    def _fetch_repo_data(self, repo: Repository) -> Dict[str, Any]:
         """
         Fetch repository data from GitHub API.
 
@@ -165,7 +168,7 @@ class GitHubSource(DataSource):
             "cached_at": datetime.now(timezone.utc).isoformat()
         }
 
-    def _fetch_pr_metrics(self, repo) -> Dict[str, Any]:
+    def _fetch_pr_metrics(self, repo: Repository) -> Dict[str, Any]:
         """
         Fetch pull request and code review metrics for a repository.
 
@@ -249,7 +252,7 @@ class GitHubSource(DataSource):
                 "unique_reviewers": 0
             }
 
-    def _is_cache_valid(self, cached_data: Dict[str, Any], repo) -> bool:
+    def _is_cache_valid(self, cached_data: Dict[str, Any], repo: Repository) -> bool:
         """
         Check if cached data is still valid.
 

@@ -1,8 +1,10 @@
-class ImpactScore:
-    def __init__(self, weights):
-        self.weights = weights
+from typing import Dict
 
-    def score(self, normalized_metrics):
+class ImpactScore:
+    def __init__(self, weights: Dict[str, float]) -> None:
+        self.weights: Dict[str, float] = weights
+
+    def score(self, normalized_metrics: Dict[str, Dict[str, float]]) -> Dict[str, float]:
         return {
             repo: sum(
                 normalized_metrics[m][repo] * w

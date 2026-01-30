@@ -92,7 +92,7 @@ class AnalysisRun(BaseModel):
         return v
 
     @model_validator(mode='after')
-    def validate_metrics(self):
+    def validate_metrics(self) -> 'AnalysisRun':
         """Validate normalized metrics are in [0, 1] range."""
         for metric_name, value in self.normalized_metrics.items():
             if not (0.0 <= value <= 1.0):
@@ -100,7 +100,7 @@ class AnalysisRun(BaseModel):
         return self
 
     @model_validator(mode='after')
-    def validate_filtered_repos(self):
+    def validate_filtered_repos(self) -> 'AnalysisRun':
         """Ensure filtered_repos_count doesn't exceed total_repos."""
         if self.filtered_repos_count is not None:
             if self.filtered_repos_count > self.total_repos:
@@ -131,14 +131,14 @@ class AnalysisHistory(BaseModel):
         return v
 
     @model_validator(mode='after')
-    def validate_timestamps_order(self):
+    def validate_timestamps_order(self) -> 'AnalysisHistory':
         """Ensure created_at <= updated_at."""
         if self.created_at > self.updated_at:
             raise ValueError("created_at cannot be after updated_at")
         return self
 
     @model_validator(mode='after')
-    def validate_runs_order(self):
+    def validate_runs_order(self) -> 'AnalysisHistory':
         """Ensure runs are in chronological order."""
         if len(self.runs) > 1:
             for i in range(len(self.runs) - 1):

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class CacheDataSource(DataSource):
     """Caches data from other sources with in-memory and file-based persistence."""
 
-    def __init__(self, cache_file: Optional[Path] = None, cache_dir: Optional[Path] = None):
+    def __init__(self, cache_file: Optional[Path] = None, cache_dir: Optional[Path] = None) -> None:
         """
         Initialize cache data source.
 
@@ -25,8 +25,8 @@ class CacheDataSource(DataSource):
             cache_dir: Optional directory containing per-repo cache files
         """
         self.cache: Dict[str, Any] = {}
-        self.cache_file = cache_file
-        self.cache_dir = cache_dir
+        self.cache_file: Optional[Path] = cache_file
+        self.cache_dir: Optional[Path] = cache_dir
 
         # Load from cache_dir if provided (per-repo caching)
         if cache_dir and cache_dir.exists():
@@ -110,7 +110,7 @@ class CacheDataSource(DataSource):
             return
 
         try:
-            with open(self.cache_file, 'w') as f:
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(self.cache, f, indent=2)
         except IOError as e:
             raise DataSourceError(f"Failed to persist cache to {self.cache_file}") from e

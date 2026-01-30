@@ -55,7 +55,7 @@ def test_pipeline_end_to_end_analysis(sample_repos):
     assert metrics_result["loc"].get_value_by_repo("project_c", "total_loc") == 2000
 
 
-def test_pipeline_normalisation_workflow(sample_repos):
+def test_pipeline_normalisation_workflow(sample_repos: List[RepoStats]) -> None:
     """Test normalisation as part of pipeline."""
     metric = LOCMetric()
     analyser = Analyser([metric])
@@ -84,7 +84,7 @@ def test_pipeline_normalisation_workflow(sample_repos):
             assert 0 <= value <= 1, f"{method} normalization out of range: {value}"
 
 
-def test_pipeline_scoring_workflow(sample_repos):
+def test_pipeline_scoring_workflow(sample_repos: List[RepoStats]) -> None:
     """Test scoring as part of pipeline."""
     metric = LOCMetric()
     analyser = Analyser([metric])
@@ -107,7 +107,7 @@ def test_pipeline_scoring_workflow(sample_repos):
     assert all(0 <= score <= 1 for score in scores.values())
 
 
-def test_pipeline_end_to_end_with_multiple_metrics(sample_repos):
+def test_pipeline_end_to_end_with_multiple_metrics(sample_repos: List[RepoStats]) -> None:
     """Test pipeline with multiple metrics."""
     metric1 = LOCMetric()
 
@@ -128,7 +128,7 @@ def test_pipeline_end_to_end_with_multiple_metrics(sample_repos):
     assert len(result["commits_per_loc"]) == 3
 
 
-def test_pipeline_normalisation_consistency():
+def test_pipeline_normalisation_consistency() -> None:
     """Test that normalisation methods are consistent."""
     data = {"repo_a": 100, "repo_b": 200, "repo_c": 300}
 
@@ -192,7 +192,7 @@ def test_pipeline_engineering_score_components():
     assert score == pytest.approx(82.5, abs=1.0)
 
 
-def test_pipeline_visualization_integration(sample_repos, tmp_path):
+def test_pipeline_visualization_integration(sample_repos: List[RepoStats], tmp_path) -> None:  # type: ignore[no-untyped-def]
     """Test visualization as part of pipeline."""
     from analytics.charts.language import LanguageChart
 

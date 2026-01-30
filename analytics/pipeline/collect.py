@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class DataCollector(PipelineStep):
     """Orchestrates data collection from configured sources."""
 
-    def __init__(self, sources: List[DataSource]):
+    def __init__(self, sources: List[DataSource]) -> None:
         """
         Initialize data collector with multiple sources.
 
@@ -27,7 +27,7 @@ class DataCollector(PipelineStep):
             sources: List of DataSource implementations to fetch from
         """
         super().__init__("DataCollector")
-        self.sources = sources
+        self.sources: List[DataSource] = sources
 
     def execute(self, **kwargs) -> List[RepoStats]:
         """

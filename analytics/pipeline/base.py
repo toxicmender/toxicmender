@@ -19,15 +19,15 @@ class PipelineStep(ABC):
     logging, validation, and error handling.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         """
         Initialize pipeline step.
 
         Args:
             name: Human-readable name for this pipeline step
         """
-        self.name = name
-        self.logger = logging.getLogger(f"{__name__}.{name}")
+        self.name: str = name
+        self.logger: logging.Logger = logging.getLogger(f"{__name__}.{name}")
 
     @abstractmethod
     def execute(self, **kwargs) -> Any:

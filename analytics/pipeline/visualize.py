@@ -3,6 +3,7 @@ Visualization pipeline stage.
 Generates charts and visual representations of analysis results.
 """
 from analytics.pipeline.base import PipelineStep
+from analytics.charts.base import Chart
 from analytics.charts.category import CategoryChart
 from analytics.charts.efficiency import EfficiencyChart
 from analytics.charts.heatmap import HeatmapChart
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 class Visualizer(PipelineStep):
     """Generates visualizations from analysis results."""
 
-    def __init__(self, charts: List[Tuple[Any, str]]):
+    def __init__(self, charts: List[Tuple[Chart, str]]) -> None:
         """
         Initialize visualizer with chart configurations.
 
@@ -30,7 +31,7 @@ class Visualizer(PipelineStep):
             charts: List of tuples (chart_object, output_path)
         """
         super().__init__("Visualizer")
-        self.charts = charts
+        self.charts: List[Tuple[Chart, str]] = charts
 
     def execute(self, **kwargs) -> None:
         """
@@ -43,7 +44,7 @@ class Visualizer(PipelineStep):
             chart.render(path)
 
 
-def _load_metrics(data_dir: Path) -> Dict:
+def _load_metrics(data_dir: Path) -> Dict[str, Any]:
     """Load metrics from JSON file."""
     metrics_file = data_dir / "metrics.json"
     if not metrics_file.exists():
@@ -53,7 +54,7 @@ def _load_metrics(data_dir: Path) -> Dict:
         return json.load(f)
 
 
-def _load_repositories(data_dir: Path, username: str = None) -> List[Dict]:
+def _load_repositories(data_dir: Path, username: Optional[str] = None) -> List[Dict[str, Any]]:
     """Load repository data from JSON file."""
     # Try to find repositories.json
     if username:
@@ -72,7 +73,7 @@ def _load_repositories(data_dir: Path, username: str = None) -> List[Dict]:
         return json.load(f)
 
 
-def _create_efficiency_chart(metrics: Dict, repos: List[Dict]) -> EfficiencyChart:
+def _create_efficiency_chart(metrics: Dict[str, Any], repos: List[Dict[str, Any]]) -> EfficiencyChart:
     """Create efficiency chart from metrics data."""
     efficiency_data = metrics.get("efficiency", {})
     repo_names = efficiency_data.get("repo_names", [])
@@ -92,9 +93,9 @@ def _create_efficiency_chart(metrics: Dict, repos: List[Dict]) -> EfficiencyChar
     return EfficiencyChart(data)
 
 
-def _create_language_chart(repos: List[Dict]) -> LanguageChart:
+def _create_language_chart(repos: List[Dict[str, Any]]) -> LanguageChart:
     """Create language distribution pie chart."""
-    language_totals = {}
+    language_totals: Dict[str, int] = {}
 
     for repo in repos:
         languages = repo.get("languages", {})

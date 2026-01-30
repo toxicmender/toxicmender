@@ -13,7 +13,7 @@ import csv
 class FilesystemDataSource(DataSource):
     """Fetches repository data from local filesystem files."""
 
-    def __init__(self, file_path: Path):
+    def __init__(self, file_path: Path) -> None:
         """
         Initialize filesystem data source.
 
@@ -23,7 +23,7 @@ class FilesystemDataSource(DataSource):
         Raises:
             DataSourceError: If file does not exist or format is unsupported
         """
-        self.file_path = Path(file_path)
+        self.file_path: Path = Path(file_path)
 
         if not self.file_path.exists():
             raise DataSourceError(f"Data file not found: {file_path}")
@@ -62,13 +62,13 @@ class FilesystemDataSource(DataSource):
         with open(self.file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
-    def _fetch_csv(self) -> List[dict]:
+    def _fetch_csv(self) -> List[Dict[str, Any]]:
         """Parse and return CSV file as list of dictionaries."""
-        data = []
+        data: List[Dict[str, Any]] = []
         with open(self.file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                data.append(row)
+                data.append(dict(row))
         return data
 
     def _fetch_yaml(self) -> Any:

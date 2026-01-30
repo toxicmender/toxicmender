@@ -9,7 +9,7 @@ class Chart(ABC):
     def render(self, output: Path) -> None:
         pass
 
-    def _validate_path(self, output_path: Path):
+    def _validate_path(self, output_path: Path) -> bool:
         if output_path.suffix not in {".svg", ".png"}:
             raise ChartError("Chart output must be SVG or PNG")
         if not output_path.parent.exists():

@@ -4,6 +4,7 @@ Computes metrics and normalized scores on collected repository data.
 """
 from analytics.pipeline.base import PipelineStep
 from analytics.models.repo import RepoStats
+from analytics.metrics.base import Metric
 from analytics.metrics import (
     LOCMetric,
     EfficiencyMetric,
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 class Analyser(PipelineStep):
     """Analyzes repository data using configured metrics."""
 
-    def __init__(self, metrics: List[Any]):
+    def __init__(self, metrics: List[Metric]) -> None:
         """
         Initialize analyzer with metrics.
 
@@ -39,7 +40,7 @@ class Analyser(PipelineStep):
             metrics: List of metric objects to compute
         """
         super().__init__("Analyser")
-        self.metrics = metrics
+        self.metrics: List[Metric] = metrics
 
     def execute(self, repos: List[RepoStats], **kwargs) -> Dict[str, Any]:
         """
