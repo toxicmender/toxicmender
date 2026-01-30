@@ -66,6 +66,18 @@ Scatter plot showing the correlation between repository size and community engag
 
 Temporal analysis of contribution patterns, showing when development activity is most concentrated.
 
+### Pull Request Metrics
+
+![PR Metrics]({pr_metrics_chart_path})
+
+Analysis of pull request velocity, review engagement, merge quality, and collaboration patterns across repositories.
+
+### Code Review Engagement
+
+![Review Engagement]({review_engagement_chart_path})
+
+Detailed view of code review coverage, thoroughness, and reviewer diversity metrics.
+
 ---
 
 ## 🔍 Detailed Metrics
@@ -122,6 +134,28 @@ High impact scores reflect valuable contributions that resonate with the develop
 
 Scale metrics indicate the scope and ambition of development projects.
 
+### PR Review Metric
+
+**Definition**: Measures pull request velocity, quality, and collaboration patterns.
+
+- **Total PRs Merged**: {total_prs_merged}
+- **Average PR Merge Rate**: {avg_pr_merge_rate}%
+- **Average Reviews per PR**: {avg_reviews_per_pr}
+- **Unique Reviewers**: {unique_reviewers}
+
+High PR velocity with good merge rates demonstrates active collaborative development.
+
+### Code Review Metric
+
+**Definition**: Evaluates the quality and thoroughness of code review processes.
+
+- **Average Comments per PR**: {avg_comments_per_pr}
+- **Review Coverage**: {review_coverage}%
+- **Reviewer Diversity**: {reviewer_diversity}
+- **Average Merge Time**: {avg_merge_time} hours
+
+Thorough code reviews with high coverage indicate strong quality practices.
+
 ---
 
 ## 📚 Top Repositories
@@ -143,6 +177,12 @@ Scale metrics indicate the scope and ambition of development projects.
 | Repository | Commits | Last Updated | Languages | Impact Score |
 |-----------|---------|--------------|-----------|--------------|
 {top_repos_by_activity}
+
+### By PR Activity
+
+| Repository | PRs Merged | Merge Rate | Avg Reviews | Unique Reviewers |
+|-----------|-----------|-----------|------------|------------------|
+{top_repos_by_pr_activity}
 
 ---
 
@@ -196,7 +236,8 @@ Scale metrics indicate the scope and ambition of development projects.
 ## 🎨 Methodology
 
 ### Data Collection
-
+Pull Request Data**: PR counts, merge times, review statistics
+5. **
 Data is collected from GitHub using the PyGithub API, with the following components:
 
 1. **Repository Metadata**: Name, description, creation date, update date
@@ -248,6 +289,8 @@ breadth: {breadth_weight}
 consistency: {consistency_weight}
 efficiency: {efficiency_weight}
 impact: {impact_weight}
+pr_review: {pr_review_weight}
+code_review: {code_review_weight}
 scale: {scale_weight}
 ```
 
@@ -282,8 +325,8 @@ Each stage is independently testable and configurable.
 ## 🚀 Future Enhancements
 
 Planned improvements to the analytics system:
-
-- [x] Time-series analysis for tracking metric evolution
+- [x] Pull request and code review metrics
+<!-- - [ ] Comparative analysis against similar developers -->tric evolution
 <!-- - [ ] Comparative analysis against similar developers -->
 - [ ] Pull request and code review metrics
 - [ ] Dependency analysis and security scoring

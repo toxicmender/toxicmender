@@ -65,11 +65,33 @@ Each cached repository file contains:
     "Python": 3000,
     "JavaScript": 2000
   },
+  "pr_metrics": {
+    "pr_count": 25,
+    "pr_merged_count": 22,
+    "pr_closed_count": 3,
+    "avg_pr_merge_time_hours": 36.5,
+    "pr_review_count": 60,
+    "avg_reviews_per_pr": 2.4,
+    "pr_comments_count": 150,
+    "unique_reviewers": 10
+  },
   "updated_at": "2025-01-20T10:30:00",
   "latest_commit": "abc123...",
   "cached_at": "2025-01-26T12:00:00"
 }
 ```
+
+### PR Metrics Caching
+
+Pull request data is cached alongside repository metrics:
+- **PR counts**: Total, merged, and closed PRs
+- **Review statistics**: Review counts, average reviews per PR, unique reviewers
+- **Merge timing**: Average time to merge PRs
+- **Comments**: Total comment count across all PRs
+
+PR data is limited to the most recent 100 PRs per repository to avoid excessive API calls and storage.
+
+**Note**: PR metrics are fetched with each repository but cached separately. If you need to refresh only PR data, delete the cached file for that repository.
 
 ## Benefits
 
