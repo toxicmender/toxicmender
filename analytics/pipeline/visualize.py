@@ -8,6 +8,9 @@ from analytics.charts.efficiency import EfficiencyChart
 from analytics.charts.heatmap import HeatmapChart
 from analytics.charts.language import LanguageChart
 from analytics.charts.repo_vs_stars import RepoVsStarsChart
+from analytics.charts.pr_metrics import PRMetricsChart, ReviewEngagementChart
+from analytics.models.repo import RepoStats
+from analytics.models.metrics import MetricResult
 from typing import List, Tuple, Any, Dict
 from pathlib import Path
 import logging
@@ -249,6 +252,62 @@ def run(data_dir: Path, charts_dir: Path) -> None:
         logger.info("Created category chart")
     except Exception as e:
         logger.warning(f"Failed to create category chart: {e}")
+
+    try:
+        # 6. PR Metrics Chart
+        pr_review_data = metrics.get("pr_review", {})
+        code_review_data = metrics.get("code_review", {})
+
+        if pr_review_data and code_review_data:
+            # Convert dict to MetricResult
+            pr_review_result = MetricResult(
+                name="pr_review",
+                values=pr_review_data.get("values", {}),
+                repo_names=pr_review_data.get("repo_names", [])
+            )
+            code_review_result = MetricResult(
+                name="code_review",
+                values=code_review_data.get("values", {}),
+                repo_names=code_review_data.get("repo_names", [])
+            )
+
+            # Convert repos to RepoStats objects
+            from analytics.models.repo import PRMetrics
+            repo_stats = []
+            for repo in repos:
+                pr_metrics = None
+                if 'pr_metrics' in repo and repo['pr_metrics']:
+                    pm = repo['pr_metrics']
+                    pr_metrics = PRMetrics(
+                        pr_count=pm.get('pr_count', 0),
+                        pr_merged_count=pm.get('pr_merged_count', 0),
+                        pr_closed_count=pm.get('pr_closed_count', 0),
+                        avg_pr_merge_time_hours=pm.get('avg_pr_merge_time_hours'),
+                        pr_review_count=pm.get('pr_review_count', 0),
+                        avg_reviews_per_pr=pm.get('avg_reviews_per_pr', 0.0),
+                        pr_comments_count=pm.get('pr_comments_count', 0),
+                        unique_reviewers=pm.get('unique_reviewers', 0)
+                    )
+
+                repo_stats.append(RepoStats(
+                    name=repo['name'],
+                    loc=repo['loc'],
+                    commits=repo['commits'],
+                    stars=repo['stars'],
+                    forks=repo['forks'],
+                    languages=repo.get('languages', {}),
+                    pr_metrics=pr_metrics
+                ))
+
+            pr_chart = PRMetricsChart(str(charts_dir / "pr_metrics.png"))
+            pr_chart.generate(pr_review_result, code_review_result, repo_stats)
+            logger.info("Created PR metrics chart")
+
+            review_chart = ReviewEngagementChart(str(charts_dir / "review_engagement.png"))
+            review_chart.generate(code_review_result, repo_stats)
+            logger.info("Created review engagement chart")
+    except Exception as e:
+        logger.warning(f"Failed to create PR/review charts: {e}")
 
     # Render all charts
     visualizer = Visualizer(charts=charts)

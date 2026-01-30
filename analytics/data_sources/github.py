@@ -1,6 +1,7 @@
 from analytics.data_sources.base import DataSource
 from analytics.exceptions import DataSourceError
 from analytics.utils.validation import require_non_empty
+from analytics.config.auth import get_github_token
 from github import Github, GithubException, RateLimitExceededException
 from pathlib import Path
 from typing import Optional, Dict, Any, List
@@ -19,10 +20,15 @@ class GitHubSource(DataSource):
         Args:
             username: GitHub username to fetch repos from
             cache_dir: Directory to cache individual repo data (defaults to data/{username}/repos_cache)
-            token: GitHub personal access token for higher rate limits
+            token: GitHub personal access token for higher rate limits (if None, auto-loaded from environment)
         """
         require_non_empty(username, "username")
         self.username = username
+
+        # Auto-load token from environment if not provided
+        if token is None:
+            token = get_github_token()
+
         self.client = Github(token) if token else Github()
         self.cache_dir = cache_dir or Path(f"data/{username}/repos_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -153,10 +159,95 @@ class GitHubSource(DataSource):
             "stars": repo.stargazers_count,
             "forks": repo.forks_count,
             "languages": languages if languages else {},
+            "pr_metrics": self._fetch_pr_metrics(repo),
             "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
             "latest_commit": latest_commit,
             "cached_at": datetime.now(timezone.utc).isoformat()
         }
+
+    def _fetch_pr_metrics(self, repo) -> Dict[str, Any]:
+        """
+        Fetch pull request and code review metrics for a repository.
+
+        Args:
+            repo: PyGithub Repository object
+
+        Returns:
+            Dictionary with PR metrics
+        """
+        try:
+            # Fetch all PRs (both open and closed)
+            pulls = repo.get_pulls(state='all', sort='created', direction='desc')
+
+            pr_count = 0
+            merged_count = 0
+            closed_count = 0
+            total_merge_time_hours = 0
+            merge_time_count = 0
+            review_count = 0
+            comment_count = 0
+            reviewers = set()
+
+            # Limit to recent PRs to avoid rate limits (e.g., last 100)
+            max_prs = 100
+
+            for pr in pulls[:max_prs]:
+                pr_count += 1
+
+                if pr.merged:
+                    merged_count += 1
+                    # Calculate merge time
+                    if pr.created_at and pr.merged_at:
+                        merge_time = pr.merged_at - pr.created_at
+                        total_merge_time_hours += merge_time.total_seconds() / 3600
+                        merge_time_count += 1
+                elif pr.state == 'closed':
+                    closed_count += 1
+
+                # Get reviews
+                try:
+                    reviews = pr.get_reviews()
+                    review_count += reviews.totalCount
+                    for review in reviews:
+                        if review.user:
+                            reviewers.add(review.user.login)
+                except Exception as e:
+                    logger.debug(f"Failed to get reviews for PR #{pr.number}: {e}")
+
+                # Get comments
+                try:
+                    comment_count += pr.comments
+                except Exception as e:
+                    logger.debug(f"Failed to get comment count for PR #{pr.number}: {e}")
+
+            # Calculate averages
+            avg_merge_time = total_merge_time_hours / merge_time_count if merge_time_count > 0 else None
+            avg_reviews = review_count / pr_count if pr_count > 0 else 0.0
+
+            return {
+                "pr_count": pr_count,
+                "pr_merged_count": merged_count,
+                "pr_closed_count": closed_count,
+                "avg_pr_merge_time_hours": avg_merge_time,
+                "pr_review_count": review_count,
+                "avg_reviews_per_pr": avg_reviews,
+                "pr_comments_count": comment_count,
+                "unique_reviewers": len(reviewers)
+            }
+
+        except Exception as e:
+            logger.warning(f"Failed to fetch PR metrics for {repo.name}: {e}")
+            # Return default empty metrics
+            return {
+                "pr_count": 0,
+                "pr_merged_count": 0,
+                "pr_closed_count": 0,
+                "avg_pr_merge_time_hours": None,
+                "pr_review_count": 0,
+                "avg_reviews_per_pr": 0.0,
+                "pr_comments_count": 0,
+                "unique_reviewers": 0
+            }
 
     def _is_cache_valid(self, cached_data: Dict[str, Any], repo) -> bool:
         """

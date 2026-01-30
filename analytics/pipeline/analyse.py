@@ -11,6 +11,8 @@ from analytics.metrics import (
     ConsistencyMetric,
     ImpactMetric,
     ScaleMetric,
+    PRReviewMetric,
+    CodeReviewMetric,
 )
 from analytics.utils.language_filter import load_language_filters, filter_repos_list
 from analytics.config.settings import LANGUAGE_FILTER_CONFIG, MAX_RUNS_PER_USER
@@ -151,17 +153,33 @@ def run(input_dir: Path, output_dir: Path) -> None:
     repos_data = _load_repos_data(user_dir)
 
     # Convert to RepoStats objects
-    repos = [
-        RepoStats(
+    from analytics.models.repo import PRMetrics
+    repos = []
+    for repo in repos_data:
+        # Parse PR metrics if present
+        pr_metrics = None
+        if 'pr_metrics' in repo and repo['pr_metrics']:
+            pm = repo['pr_metrics']
+            pr_metrics = PRMetrics(
+                pr_count=pm.get('pr_count', 0),
+                pr_merged_count=pm.get('pr_merged_count', 0),
+                pr_closed_count=pm.get('pr_closed_count', 0),
+                avg_pr_merge_time_hours=pm.get('avg_pr_merge_time_hours'),
+                pr_review_count=pm.get('pr_review_count', 0),
+                avg_reviews_per_pr=pm.get('avg_reviews_per_pr', 0.0),
+                pr_comments_count=pm.get('pr_comments_count', 0),
+                unique_reviewers=pm.get('unique_reviewers', 0)
+            )
+
+        repos.append(RepoStats(
             name=repo['name'],
             loc=repo['loc'],
             commits=repo['commits'],
             stars=repo['stars'],
             forks=repo['forks'],
-            languages=repo.get('languages', {})
-        )
-        for repo in repos_data
-    ]
+            languages=repo.get('languages', {}),
+            pr_metrics=pr_metrics
+        ))
 
     # Apply language filtering if configured
     filter_config_path = LANGUAGE_FILTER_CONFIG
@@ -191,6 +209,8 @@ def run(input_dir: Path, output_dir: Path) -> None:
         ConsistencyMetric(),
         ImpactMetric(),
         ScaleMetric(),
+        PRReviewMetric(),
+        CodeReviewMetric(),
     ]
 
     analyser = Analyser(metrics=metrics)

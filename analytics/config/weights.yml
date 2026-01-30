@@ -1,11 +1,13 @@
 metric_weights:
-  loc: 0.15
-  commits: 0.15
+  loc: 0.10
+  commits: 0.10
   breadth: 0.10
-  consistency: 0.20
+  consistency: 0.15
   efficiency: 0.15
-  impact: 0.15
+  impact: 0.10
   scale: 0.10
+  pr_review: 0.10
+  code_review: 0.10
 
 normalization:
   method: "log_minmax"

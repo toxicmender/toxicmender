@@ -9,6 +9,7 @@ from analytics.charts.efficiency import EfficiencyChart
 from analytics.charts.heatmap import HeatmapChart
 from analytics.charts.language import LanguageChart
 from analytics.charts.repo_vs_stars import RepoVsStarsChart
+from analytics.charts.pr_metrics import PRMetricsChart, ReviewEngagementChart
 
 __all__ = [
     "Chart",
@@ -17,4 +18,6 @@ __all__ = [
     "HeatmapChart",
     "LanguageChart",
     "RepoVsStarsChart",
+    "PRMetricsChart",
+    "ReviewEngagementChart",
 ]

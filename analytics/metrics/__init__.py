@@ -10,6 +10,8 @@ from analytics.metrics.breadth import BreadthMetric
 from analytics.metrics.consistency import ConsistencyMetric
 from analytics.metrics.impact import ImpactMetric
 from analytics.metrics.scale import ScaleMetric
+from analytics.metrics.pr_review import PRReviewMetric
+from analytics.metrics.code_review import CodeReviewMetric
 
 __all__ = [
     "Metric",
@@ -19,4 +21,6 @@ __all__ = [
     "ConsistencyMetric",
     "ImpactMetric",
     "ScaleMetric",
+    "PRReviewMetric",
+    "CodeReviewMetric",
 ]

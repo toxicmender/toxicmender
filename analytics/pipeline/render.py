@@ -280,6 +280,8 @@ def _build_context(metrics: Dict, repos: List[Dict], weights: Dict, data_dir: Pa
     context['efficiency_weight'] = int(weights.get('efficiency', 0.15) * 100)
     context['impact_weight'] = int(weights.get('impact', 0.15) * 100)
     context['scale_weight'] = int(weights.get('scale', 0.1) * 100)
+    context['pr_review_weight'] = int(weights.get('pr_review', 0.1) * 100)
+    context['code_review_weight'] = int(weights.get('code_review', 0.1) * 100)
 
     # Compute engineering score
     score_data = _compute_engineering_score(metric_data, weights)
@@ -551,6 +553,17 @@ def _fill_defaults(context: Dict) -> None:
         'code_volume_index': 'N/A',
         'language_diversity_index': 'N/A',
         'cross_platform_score': 'N/A',
+        'pr_metrics_chart_path': 'charts/pr_metrics.png',
+        'review_engagement_chart_path': 'charts/review_engagement.png',
+        'total_prs_merged': '0',
+        'avg_pr_merge_rate': '0.0',
+        'avg_reviews_per_pr': '0.0',
+        'unique_reviewers': '0',
+        'avg_comments_per_pr': '0.0',
+        'review_coverage': '0.0',
+        'reviewer_diversity': '0.0',
+        'avg_merge_time': '0.0',
+        'top_repos_by_pr_activity': '| No PR data available | | | | |',
     }
 
     for key, value in defaults.items():

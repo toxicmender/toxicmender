@@ -1,0 +1,52 @@
+# Pull Request and Code Review Thresholds
+# Defines quality levels for PR and review metrics
+
+pr_review:
+  pr_velocity:
+    excellent: 50    # 50+ merged PRs
+    good: 20         # 20-49 merged PRs
+    acceptable: 5    # 5-19 merged PRs
+    poor: 0          # 0-4 merged PRs
+
+  pr_quality:
+    excellent: 0.80  # 80%+ merge rate
+    good: 0.60       # 60-79% merge rate
+    acceptable: 0.40 # 40-59% merge rate
+    poor: 0.0        # <40% merge rate
+
+  review_engagement:
+    excellent: 3.0   # 3+ reviews per PR on average
+    good: 2.0        # 2-3 reviews per PR
+    acceptable: 1.0  # 1-2 reviews per PR
+    poor: 0.0        # <1 review per PR
+
+  collaboration:
+    excellent: 10    # 10+ unique reviewers
+    good: 5          # 5-9 unique reviewers
+    acceptable: 2    # 2-4 unique reviewers
+    poor: 0          # 0-1 reviewers
+
+code_review:
+  review_thoroughness:
+    excellent: 10.0  # 10+ comments per PR on average
+    good: 5.0        # 5-10 comments per PR
+    acceptable: 2.0  # 2-5 comments per PR
+    poor: 0.0        # <2 comments per PR
+
+  review_coverage:
+    excellent: 0.90  # 90%+ PRs have reviews
+    good: 0.70       # 70-89% PRs have reviews
+    acceptable: 0.50 # 50-69% PRs have reviews
+    poor: 0.0        # <50% PRs have reviews
+
+  reviewer_diversity:
+    excellent: 0.50  # 0.5+ unique reviewers per PR
+    good: 0.30       # 0.3-0.5 reviewers per PR
+    acceptable: 0.10 # 0.1-0.3 reviewers per PR
+    poor: 0.0        # <0.1 reviewers per PR
+
+  merge_efficiency:
+    excellent: 24    # Merged within 24 hours
+    good: 72         # Merged within 72 hours (3 days)
+    acceptable: 168  # Merged within 1 week
+    poor: 999999     # >1 week to merge

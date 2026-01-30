@@ -6,7 +6,7 @@ from analytics.pipeline.base import PipelineStep
 from analytics.data_sources.base import DataSource
 from analytics.data_sources.github import GitHubSource
 from analytics.data_sources.cache import CacheDataSource
-from analytics.models.repo import RepoStats
+from analytics.models.repo import RepoStats, PRMetrics
 from analytics.exceptions import DataSourceError
 from typing import List, Dict, Any, Optional
 from pathlib import Path
@@ -131,13 +131,29 @@ class DataCollector(PipelineStep):
         Raises:
             ValueError: If required fields are missing
         """
+        # Parse PR metrics if present
+        pr_metrics = None
+        if 'pr_metrics' in item and item['pr_metrics']:
+            pr_data = item['pr_metrics']
+            pr_metrics = PRMetrics(
+                pr_count=pr_data.get('pr_count', 0),
+                pr_merged_count=pr_data.get('pr_merged_count', 0),
+                pr_closed_count=pr_data.get('pr_closed_count', 0),
+                avg_pr_merge_time_hours=pr_data.get('avg_pr_merge_time_hours'),
+                pr_review_count=pr_data.get('pr_review_count', 0),
+                avg_reviews_per_pr=pr_data.get('avg_reviews_per_pr', 0.0),
+                pr_comments_count=pr_data.get('pr_comments_count', 0),
+                unique_reviewers=pr_data.get('unique_reviewers', 0)
+            )
+
         return RepoStats(
             name=item.get('name', item.get('repo_name', 'Unknown')),
             loc=int(item.get('loc', item.get('lines_of_code', 0))),
             commits=int(item.get('commits', item.get('commit_count', 0))),
             stars=int(item.get('stars', item.get('stargazers_count', 0))),
             forks=int(item.get('forks', item.get('forks_count', 0))),
-            languages=item.get('languages', {})
+            languages=item.get('languages', {}),
+            pr_metrics=pr_metrics
         )
 
 def run(username: str, output_dir: Path = Path("data"), github_token: Optional[str] = None) -> None:
