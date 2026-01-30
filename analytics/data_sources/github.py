@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +155,7 @@ class GitHubSource(DataSource):
             "languages": languages if languages else {},
             "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
             "latest_commit": latest_commit,
-            "cached_at": datetime.utcnow().isoformat()
+            "cached_at": datetime.now(timezone.utc).isoformat()
         }
 
     def _is_cache_valid(self, cached_data: Dict[str, Any], repo) -> bool:

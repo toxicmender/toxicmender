@@ -2,6 +2,7 @@ from typing import Annotated
 import typer
 from pathlib import Path
 from analytics.pipeline import analyse, collect, visualize, render
+from analytics.migration import MigrationManager
 from analytics.exceptions import AnalyticsError
 
 app = typer.Typer(
@@ -85,6 +86,45 @@ def run(
     except AnalyticsError as e:
         typer.secho(f"❌ {e}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
+
+
+@app.command()
+def migrate_data(
+    username: Annotated[str, typer.Option(help="GitHub username")],
+    data_dir: Annotated[Path, typer.Option(help="Data directory")] = Path("data/"),
+    force: Annotated[bool, typer.Option(help="Overwrite existing history if present")] = False
+):
+    """
+    Migrate v1.x metrics.json to v2.0 history format.
+    """
+    user_dir = data_dir / username
+    manager = MigrationManager(user_dir)
+    try:
+        typer.echo(f"🔄 Migrating data for {username}...")
+        history = manager.migrate_user_data(username=username, force=force)
+        typer.echo(f"✅ Migration complete: {len(history.runs)} run(s) migrated")
+    except Exception as e:
+        typer.secho(f"❌ Migration failed: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def check_migration(
+    username: Annotated[str, typer.Option(help="GitHub username")],
+    data_dir: Annotated[Path, typer.Option(help="Data directory")] = Path("data/")
+):
+    """
+    Validate migration status for a user.
+    """
+    user_dir = data_dir / username
+    manager = MigrationManager(user_dir)
+    report = manager.validate_migration()
+    if report["success"]:
+        typer.echo(f"✅ Migration OK: {report['runs_found']} run(s) found")
+    else:
+        typer.secho("⚠️ Migration issues detected:", fg=typer.colors.YELLOW)
+        for err in report["errors"]:
+            typer.echo(f" - {err}")
 
 if __name__ == "__main__":
     app()

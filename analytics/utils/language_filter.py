@@ -122,7 +122,7 @@ def filter_repo_languages(
         new_loc = 1  # Temporary value, will be filtered out if remove_empty_repos=True
 
     # Create new RepoStats with filtered data
-    repo_dict = repo.dict()
+    repo_dict = repo.model_dump()
     repo_dict['languages'] = filtered_languages
     repo_dict['loc'] = new_loc
 

@@ -46,23 +46,27 @@ def test_pipeline_end_to_end_analysis(sample_repos):
     # Step 1: Analyze
     metric = LOCMetric()
     analyser = Analyser([metric])
-    metrics_result = analyser.run(sample_repos)
+    metrics_result = analyser.run(repos=sample_repos)
 
     assert "loc" in metrics_result
-    assert len(metrics_result["loc"]) == 3
-    assert metrics_result["loc"]["project_a"] == 5000
-    assert metrics_result["loc"]["project_b"] == 10000
-    assert metrics_result["loc"]["project_c"] == 2000
+    assert len(metrics_result["loc"].repo_names) == 3
+    assert metrics_result["loc"].get_value_by_repo("project_a", "total_loc") == 5000
+    assert metrics_result["loc"].get_value_by_repo("project_b", "total_loc") == 10000
+    assert metrics_result["loc"].get_value_by_repo("project_c", "total_loc") == 2000
 
 
 def test_pipeline_normalisation_workflow(sample_repos):
     """Test normalisation as part of pipeline."""
     metric = LOCMetric()
     analyser = Analyser([metric])
-    metrics_result = analyser.run(sample_repos)
+    metrics_result = analyser.run(repos=sample_repos)
 
     # Normalize using different methods
-    raw_metrics = metrics_result["loc"]
+    metric_result = metrics_result["loc"]
+    raw_metrics = {
+        repo: metric_result.get_value_by_repo(repo, "total_loc")
+        for repo in metric_result.repo_names
+    }
 
     # Test each normalisation method
     log_normalized = log_minmax(raw_metrics)
@@ -84,10 +88,14 @@ def test_pipeline_scoring_workflow(sample_repos):
     """Test scoring as part of pipeline."""
     metric = LOCMetric()
     analyser = Analyser([metric])
-    metrics_result = analyser.run(sample_repos)
+    metrics_result = analyser.run(repos=sample_repos)
 
     # Normalize
-    raw_metrics = metrics_result["loc"]
+    metric_result = metrics_result["loc"]
+    raw_metrics = {
+        repo: metric_result.get_value_by_repo(repo, "total_loc")
+        for repo in metric_result.repo_names
+    }
     normalized = log_minmax(raw_metrics)
 
     # Score using impact scoring
@@ -112,11 +120,11 @@ def test_pipeline_end_to_end_with_multiple_metrics(sample_repos):
     }
 
     analyser = Analyser([metric1, metric2])
-    result = analyser.run(sample_repos)
+    result = analyser.run(repos=sample_repos)
 
     assert "loc" in result
     assert "commits_per_loc" in result
-    assert len(result["loc"]) == 3
+    assert len(result["loc"].repo_names) == 3
     assert len(result["commits_per_loc"]) == 3
 
 
@@ -209,11 +217,16 @@ def test_pipeline_full_workflow_simulation(sample_repos, tmp_path):
     # 2. Analyze
     metric = LOCMetric()
     analyser = Analyser([metric])
-    raw_metrics = analyser.run(repos)
+    raw_metrics = analyser.run(repos=repos)
 
     # 3. Normalize
+    metric_result = raw_metrics["loc"]
+    loc_map = {
+        repo: metric_result.get_value_by_repo(repo, "total_loc")
+        for repo in metric_result.repo_names
+    }
     normalized = {
-        "loc": log_minmax(raw_metrics["loc"])
+        "loc": log_minmax(loc_map)
     }
 
     # 4. Score

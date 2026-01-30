@@ -52,6 +52,13 @@ LANGUAGE_FILTER_CONFIG = CONFIG_DIR / "language_filters.yml"
 LANGUAGE_FILTER_ENABLED = True
 DEFAULT_EXCLUDED_LANGUAGES = ["HTML", "CSS", "Jupyter Notebook"]
 
+# Time-series tracking settings
+HISTORY_DIR = "history"  # Relative to user data dir
+MAX_RUNS_PER_USER = 100
+INDEX_FILENAME = "index.json"
+RUN_FILE_PATTERN = "{run_id}.json"
+PRUNE_RUNS_ON_SAVE = True
+
 # Feature flags
 ENABLE_CACHING = True
 ENABLE_PARALLEL_PROCESSING = True
@@ -74,4 +81,9 @@ __all__ = [
     "LOG_LEVEL",
     "LANGUAGE_FILTER_CONFIG",
     "LANGUAGE_FILTER_ENABLED",
+    "HISTORY_DIR",
+    "MAX_RUNS_PER_USER",
+    "INDEX_FILENAME",
+    "RUN_FILE_PATTERN",
+    "PRUNE_RUNS_ON_SAVE",
 ]

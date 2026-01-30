@@ -13,9 +13,13 @@ from analytics.metrics import (
     ScaleMetric,
 )
 from analytics.utils.language_filter import load_language_filters, filter_repos_list
-from analytics.config.settings import LANGUAGE_FILTER_CONFIG
+from analytics.config.settings import LANGUAGE_FILTER_CONFIG, MAX_RUNS_PER_USER
+from analytics.history import HistoryManager
+from analytics.models.time_series import AnalysisRun
+from analytics.normalisation.minmax import log_minmax
 from typing import List, Dict, Any
 from pathlib import Path
+from datetime import datetime, timezone
 import logging
 import json
 
@@ -49,6 +53,44 @@ class Analyser(PipelineStep):
             metric.name: metric.compute(repos)
             for metric in self.metrics
         }
+
+
+def _resolve_user_dir(input_dir: Path) -> Path:
+    """
+    Resolve the user-specific data directory.
+
+    Args:
+        input_dir: Input directory provided by caller
+
+    Returns:
+        Path to user directory
+
+    Raises:
+        FileNotFoundError: If no suitable directory is found
+    """
+    input_dir = Path(input_dir)
+
+    if (input_dir / "repositories.json").exists() or (input_dir / "repos_cache").is_dir():
+        return input_dir
+
+    if input_dir.exists() and input_dir.is_dir():
+        candidates = []
+        for child in input_dir.iterdir():
+            if not child.is_dir():
+                continue
+            if (child / "repositories.json").exists() or (child / "repos_cache").is_dir():
+                candidates.append(child)
+
+        if len(candidates) == 1:
+            return candidates[0]
+        if len(candidates) > 1:
+            names = ", ".join(sorted(c.name for c in candidates))
+            raise FileNotFoundError(
+                "Multiple repository data directories found. "
+                f"Specify one of: {names}"
+            )
+
+    raise FileNotFoundError(f"Repository data not found in: {input_dir}")
 
 
 def _load_repos_data(input_dir: Path) -> List[Dict[str, Any]]:
@@ -86,24 +128,6 @@ def _load_repos_data(input_dir: Path) -> List[Dict[str, Any]]:
         if repos:
             return repos
 
-    # If input_dir is a root data directory, try to resolve a single user subdirectory
-    if input_dir.exists() and input_dir.is_dir():
-        candidates = []
-        for child in input_dir.iterdir():
-            if not child.is_dir():
-                continue
-            if (child / "repositories.json").exists() or (child / "repos_cache").is_dir():
-                candidates.append(child)
-
-        if len(candidates) == 1:
-            return _load_repos_data(candidates[0])
-        if len(candidates) > 1:
-            names = ", ".join(sorted(c.name for c in candidates))
-            raise FileNotFoundError(
-                "Multiple repository data directories found. "
-                f"Specify one of: {names}"
-            )
-
     raise FileNotFoundError(f"Repository data not found in: {input_dir}")
 
 
@@ -119,8 +143,12 @@ def run(input_dir: Path, output_dir: Path) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Resolve user directory
+    user_dir = _resolve_user_dir(input_dir)
+    username = user_dir.name
+
     # Load repository data (supports single file or per-repo cache directory)
-    repos_data = _load_repos_data(input_dir)
+    repos_data = _load_repos_data(user_dir)
 
     # Convert to RepoStats objects
     repos = [
@@ -137,6 +165,7 @@ def run(input_dir: Path, output_dir: Path) -> None:
 
     # Apply language filtering if configured
     filter_config_path = LANGUAGE_FILTER_CONFIG
+    original_repo_count = len(repos)
     if filter_config_path.exists():
         try:
             logger.info("Loading language filter configuration...")
@@ -181,3 +210,54 @@ def run(input_dir: Path, output_dir: Path) -> None:
         json.dump(serializable_results, f, indent=2, default=str)
 
     logger.info(f"Saved analysis results to {output_file}")
+
+    # Build analysis run for history tracking
+    total_repos = len(repos)
+    total_loc = sum(repo.loc for repo in repos)
+    total_commits = sum(repo.commits for repo in repos)
+    filtered_repos_count = original_repo_count - total_repos
+
+    # Aggregate metric values (average of first dimension)
+    aggregated_metrics: Dict[str, float] = {}
+    for metric_name, metric_result in results.items():
+        try:
+            values_dict = metric_result.values
+            if values_dict:
+                first_key = next(iter(values_dict.keys()))
+                values_list = values_dict.get(first_key, [])
+                if values_list:
+                    aggregated_metrics[metric_name] = sum(values_list) / len(values_list)
+        except Exception as e:
+            logger.warning(f"Failed to aggregate metric {metric_name}: {e}")
+
+    # Normalize aggregated metrics
+    try:
+        normalized_metrics = log_minmax(aggregated_metrics) if aggregated_metrics else {}
+    except Exception as e:
+        logger.warning(f"Failed to normalize metrics: {e}")
+        normalized_metrics = {}
+
+    analysis_run = AnalysisRun(
+        timestamp=datetime.now(timezone.utc),
+        username=username,
+        total_repos=total_repos,
+        total_loc=total_loc,
+        total_commits=total_commits,
+        engineering_score=0.0,
+        metrics=aggregated_metrics,
+        normalized_metrics=normalized_metrics,
+        repositories=[repo.model_dump() for repo in repos],
+        config={
+            "language_filter_enabled": filter_config_path.exists(),
+            "filter_config_path": str(filter_config_path),
+        },
+        filtered_repos_count=filtered_repos_count
+    )
+
+    # Persist history
+    history_manager = HistoryManager(user_dir, max_runs=MAX_RUNS_PER_USER)
+    history = history_manager.load_or_create(username)
+    history_manager.append_run(history, analysis_run)
+    history_manager.save(history)
+
+    logger.info(f"History updated for {username}: {len(history.runs)} run(s)")

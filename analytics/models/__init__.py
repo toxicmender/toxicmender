@@ -15,7 +15,7 @@ from analytics.models.metrics import (
     ScoreResult,
     EvaluationReport,
 )
-from analytics.models.time_series import TimeSeriesData
+from analytics.models.time_series import MetricSnapshot, AnalysisRun, AnalysisHistory
 
 __all__ = [
     "RepoStats",
@@ -26,5 +26,7 @@ __all__ = [
     "MetricResult",
     "ScoreResult",
     "EvaluationReport",
-    "TimeSeriesData",
+    "MetricSnapshot",
+    "AnalysisRun",
+    "AnalysisHistory",
 ]

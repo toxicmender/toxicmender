@@ -19,10 +19,10 @@ def test_analyser_run_single_metric(sample_repo):
     metric = LOCMetric()
     analyser = Analyser([metric])
 
-    result = analyser.run([sample_repo])
+    result = analyser.run(repos=[sample_repo])
 
     assert "loc" in result
-    assert result["loc"]["test-repo"] == 1500
+    assert result["loc"].get_value_by_repo("test-repo", "total_loc") == 1500
 
 
 def test_analyser_run_multiple_metrics(sample_repo):
@@ -36,7 +36,7 @@ def test_analyser_run_multiple_metrics(sample_repo):
     metric2.compute.return_value = {"test-repo": 200}
 
     analyser = Analyser([metric1, metric2])
-    result = analyser.run([sample_repo])
+    result = analyser.run(repos=[sample_repo])
 
     assert "metric1" in result
     assert "metric2" in result
@@ -55,19 +55,19 @@ def test_analyser_with_multiple_repos():
     metric = LOCMetric()
     analyser = Analyser([metric])
 
-    result = analyser.run(repos)
+    result = analyser.run(repos=repos)
 
     assert "loc" in result
-    assert len(result["loc"]) == 3
-    assert result["loc"]["repo1"] == 1000
-    assert result["loc"]["repo2"] == 2000
-    assert result["loc"]["repo3"] == 3000
+    assert len(result["loc"].repo_names) == 3
+    assert result["loc"].get_value_by_repo("repo1", "total_loc") == 1000
+    assert result["loc"].get_value_by_repo("repo2", "total_loc") == 2000
+    assert result["loc"].get_value_by_repo("repo3", "total_loc") == 3000
 
 
 def test_analyser_empty_metrics():
     """Test Analyser with no metrics."""
     analyser = Analyser([])
-    result = analyser.run([])
+    result = analyser.run(repos=[])
 
     assert result == {}
 
@@ -79,7 +79,7 @@ def test_analyser_empty_repos():
     metric.compute.return_value = {}
 
     analyser = Analyser([metric])
-    result = analyser.run([])
+    result = analyser.run(repos=[])
 
     assert result["metric"] == {}
 
@@ -93,7 +93,7 @@ def test_analyser_metric_error_propagates(sample_repo):
     analyser = Analyser([metric])
 
     with pytest.raises(RuntimeError):
-        analyser.run([sample_repo])
+        analyser.run(repos=[sample_repo])
 
 
 def test_analyser_preserves_metric_order(sample_repo):
@@ -108,7 +108,7 @@ def test_analyser_preserves_metric_order(sample_repo):
 
     metrics = [make_metric("first"), make_metric("second"), make_metric("third")]
     analyser = Analyser(metrics)
-    result = analyser.run([sample_repo])
+    result = analyser.run(repos=[sample_repo])
 
     assert call_order == ["first", "second", "third"]
 
@@ -128,7 +128,7 @@ def test_analyser_different_metric_results(sample_repo):
     metric3.compute.return_value = {"test-repo": {"nested": "value"}}
 
     analyser = Analyser([metric1, metric2, metric3])
-    result = analyser.run([sample_repo])
+    result = analyser.run(repos=[sample_repo])
 
     assert isinstance(result["integer_metric"]["test-repo"], int)
     assert isinstance(result["float_metric"]["test-repo"], float)
@@ -138,7 +138,7 @@ def test_analyser_different_metric_results(sample_repo):
 def test_analyser_with_real_metric(sample_repo):
     """Test Analyser with real LOCMetric."""
     analyser = Analyser([LOCMetric()])
-    result = analyser.run([sample_repo])
+    result = analyser.run(repos=[sample_repo])
 
     assert "loc" in result
-    assert result["loc"]["test-repo"] == sample_repo.loc
+    assert result["loc"].get_value_by_repo("test-repo", "total_loc") == sample_repo.loc

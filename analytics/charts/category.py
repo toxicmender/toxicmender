@@ -53,7 +53,9 @@ class CategoryChart(Chart):
         ax.set_xticks([i * width * len(self.data) + width * len(self.data) / 2
                        for i in x_pos])
         ax.set_xticklabels(self.categories)
-        ax.legend()
+        # Only show legend if there is data
+        if len(self.data) > 0:
+            ax.legend()
         ax.grid(axis='y', alpha=0.3)
 
         plt.tight_layout()

@@ -164,9 +164,9 @@ def test_rank_based_preserves_order():
 def test_rank_based_duplicate_values():
     data = {"a": 1, "b": 2, "c": 2, "d": 3}
     norm = rank_based(data)
-    # Items with same value should be ranked sequentially
+    # Items with same value should share the same rank
     assert norm["a"] == 0.0
-    assert norm["b"] < norm["c"]  # Both are 2, ordered by insertion
+    assert norm["b"] == norm["c"]
     assert norm["d"] == 1.0
 
 def test_rank_based_negative_values():

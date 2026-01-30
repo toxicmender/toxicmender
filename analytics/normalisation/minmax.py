@@ -60,13 +60,25 @@ def rank_based(values: Dict[str, float]) -> Dict[str, float]:
     if len(values) == 1:
         return {k: 1.0 for k in values}
 
-    # Sort by value and assign ranks
+    # Sort by value
     sorted_items = sorted(values.items(), key=lambda x: x[1])
     n = len(sorted_items)
 
+    # Assign average ranks for ties
     result = {}
-    for rank, (key, _) in enumerate(sorted_items):
-        # Normalize rank to [0, 1] with max value getting 1.0
-        result[key] = rank / (n - 1) if n > 1 else 1.0
+    i = 0
+    while i < n:
+        j = i
+        while j + 1 < n and sorted_items[j + 1][1] == sorted_items[i][1]:
+            j += 1
+
+        # Average rank for ties
+        avg_rank = (i + j) / 2
+        normalized = avg_rank / (n - 1) if n > 1 else 1.0
+
+        for k in range(i, j + 1):
+            result[sorted_items[k][0]] = normalized
+
+        i = j + 1
 
     return result

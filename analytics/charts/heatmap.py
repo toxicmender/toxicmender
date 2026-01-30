@@ -36,11 +36,17 @@ class HeatmapChart(Chart):
 
         # Build correlation matrix from data
         values = [self.data[name] for name in self.metric_names]
-        correlation_matrix = np.corrcoef(values)
+
+        # Handle zero variance (constant values) gracefully
+        with np.errstate(invalid='ignore', divide='ignore'):
+            correlation_matrix = np.corrcoef(values)
 
         # Handle single metric case - corrcoef returns scalar
         if correlation_matrix.ndim == 0:
             correlation_matrix = np.array([[correlation_matrix]])
+
+        # Replace NaN values (from zero variance) with 0
+        correlation_matrix = np.nan_to_num(correlation_matrix, nan=0.0)
 
         fig, ax = plt.subplots(figsize=(10, 8))
 

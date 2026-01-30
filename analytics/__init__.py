@@ -3,6 +3,13 @@ Analytics package for toxicmender.
 Provides metrics computation, data source fetching, chart rendering, and scoring.
 """
 
+try:
+    import importlib.metadata
+    __version__ = importlib.metadata.version("gh-profile")
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "1.0.0"  # Fallback
+
+
 from analytics.exceptions import (
     AnalyticsError,
     DataSourceError,
@@ -11,8 +18,8 @@ from analytics.exceptions import (
     ChartError,
 )
 
-__version__ = "0.1.0"
 __all__ = [
+    "__version__",
     "AnalyticsError",
     "DataSourceError",
     "ValidationError",

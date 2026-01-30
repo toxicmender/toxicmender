@@ -1,10 +1,20 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Dict, List, Union
 
 class MetricResult(BaseModel):
+    model_config = {'frozen': False}
+
     name: str
     values: Dict[str, Union[List[int], List[float], int, float]]
     repo_names: List[str] = Field(default_factory=list)
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        """Validate metric name is not empty."""
+        if not v or not v.strip():
+            raise ValueError("Metric name cannot be empty")
+        return v.strip()
 
     def to_dict(self) -> Dict:
         """Convert to dictionary format for JSON serialization."""
@@ -42,10 +52,23 @@ class MetricResult(BaseModel):
         return item in self.repo_names
 
 class ScoreResult(BaseModel):
+    model_config = {'frozen': True}
+
     score: float = Field(ge=0, le=100)
-    components: Dict[str, float]
+    components: Dict[str, float] = Field(default_factory=dict)
+
+    @field_validator('components')
+    @classmethod
+    def validate_components(cls, v: Dict[str, float]) -> Dict[str, float]:
+        """Validate component scores are in valid range."""
+        for key, score in v.items():
+            if not (0 <= score <= 100):
+                raise ValueError(f"Component score '{key}' must be in [0, 100], got {score}")
+        return v
 
 class EvaluationReport(BaseModel):
+    model_config = {'frozen': False}
+
     metrics: Dict[str, MetricResult]
     overall_score: ScoreResult
 
@@ -54,30 +77,3 @@ __all__ = [
     "ScoreResult",
     "EvaluationReport"
 ]
-
-# Example usage:
-if __name__ == "__main__":
-    accuracy_metric = MetricResult(
-        name="Accuracy",
-        values={"train": 0.95, "test": 0.92}
-    )
-
-    f1_metric = MetricResult(
-        name="F1 Score",
-        values={"train": 0.93, "test": 0.90}
-    )
-
-    overall_score = ScoreResult(
-        score=91.0,
-        components={"accuracy": 92.0, "f1_score": 90.0}
-    )
-
-    report = EvaluationReport(
-        metrics={
-            "accuracy": accuracy_metric,
-            "f1_score": f1_metric
-        },
-        overall_score=overall_score
-    )
-
-    print(report.json(indent=4))

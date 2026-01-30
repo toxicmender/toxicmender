@@ -1,7 +1,7 @@
 [project]
 name = "gh-profile"
-version = "0.1.0"
-description = "Github Profile README with analytics"
+version = "1.0.0"
+description = "Github Profile README with analytics and time-series tracking"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

@@ -143,15 +143,12 @@ class ResultRenderer(PipelineStep):
                         'value': value
                     })
             else:
-                # Generic dict - create one row with all key-values
-                row = {}
+                # Recurse into nested dicts/lists to flatten deeper structures
                 for key, value in obj.items():
                     if isinstance(value, (dict, list)):
-                        row[key] = json.dumps(value)
+                        rows.extend(self._flatten_results(value, prefix=key))
                     else:
-                        row[key] = value
-                if row:
-                    rows.append(row)
+                        rows.append({key: value})
         elif isinstance(obj, list):
             for item in obj:
                 rows.extend(self._flatten_results(item, prefix))
