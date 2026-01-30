@@ -73,29 +73,39 @@ class CacheDataSource(DataSource):
 
     def _load_from_file(self) -> None:
         """Load cache from disk file."""
+        if self.cache_file is None:
+            raise DataSourceError("No cache file specified")
+
         try:
             with open(self.cache_file, 'r') as f:
                 data = json.load(f)
-                # Store as list for consistent interface
+                # Store as dict or list based on data type
                 if isinstance(data, list):
+                    self.cache = {f"item_{i}": item for i, item in enumerate(data)}
+                elif isinstance(data, dict):
                     self.cache = data
                 else:
-                    self.cache = data
+                    self.cache = {"data": data}
             logger.info(f"Loaded cache from {self.cache_file}")
         except (json.JSONDecodeError, IOError) as e:
             raise DataSourceError(f"Failed to load cache from {self.cache_file}") from e
 
     def _load_from_directory(self) -> None:
         """Load cache from directory of per-repo JSON files."""
+        if self.cache_dir is None:
+            raise DataSourceError("No cache directory specified")
+
         try:
             cache_files = list(self.cache_dir.glob("*.json"))
-            repos = []
+            repos: Dict[str, Any] = {}
 
             for cache_file in cache_files:
                 try:
                     with open(cache_file, 'r', encoding='utf-8') as f:
                         repo_data = json.load(f)
-                        repos.append(repo_data)
+                        # Use filename (without .json) as key
+                        repo_name = cache_file.stem
+                        repos[repo_name] = repo_data
                 except (json.JSONDecodeError, IOError) as e:
                     logger.warning(f"Failed to load {cache_file}: {e}")
 

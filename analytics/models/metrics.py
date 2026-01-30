@@ -43,7 +43,12 @@ class MetricResult(BaseModel):
                 dimension_key = next(iter(self.values.keys()))
 
             values_list = self.values[dimension_key]
-            return values_list[repo_index]
+            # Check if it's a list before indexing
+            if isinstance(values_list, (list,)):
+                return values_list[repo_index]
+            else:
+                # It's a scalar value, return it directly
+                return values_list
         except (ValueError, IndexError, KeyError):
             return None
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Mapping
 from analytics.models.repo import RepoStats
 from analytics.models.metrics import MetricResult
 
@@ -18,10 +18,10 @@ class Metric(ABC):
         """
         pass
 
-    def _create_result(self, repos: List[RepoStats], values: Dict[str, Union[List[int], List[float]]]) -> MetricResult:
+    def _create_result(self, repos: List[RepoStats], values: Mapping[str, Union[List[int], List[float]]]) -> MetricResult:
         """Helper to create standardized MetricResult."""
         return MetricResult(
             name=self.name,
-            values=values,
+            values=dict(values),  # Convert Mapping to Dict for MetricResult
             repo_names=[repo.name for repo in repos]
         )

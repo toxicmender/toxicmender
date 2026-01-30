@@ -115,7 +115,8 @@ class GitHubSource(DataSource):
                 # Validate cache
                 if self._is_cache_valid(cached_data, repo):
                     logger.debug(f"Using valid cache for {repo.name}")
-                    return cached_data
+                    # Cast to ensure type checker knows this is Dict[str, Any]
+                    return dict(cached_data)
                 else:
                     logger.debug(f"Cache for {repo.name} is stale, refetching")
             except (json.JSONDecodeError, IOError) as e:
@@ -140,7 +141,7 @@ class GitHubSource(DataSource):
             Repository data dictionary
         """
         # Get languages with their line counts
-        languages = repo.get_languages()
+        languages: Dict[str, int] = repo.get_languages()
 
         # Calculate total LOC from all languages
         loc = sum(languages.values()) if languages else 1
@@ -161,7 +162,7 @@ class GitHubSource(DataSource):
             "commits": commit_count,
             "stars": repo.stargazers_count,
             "forks": repo.forks_count,
-            "languages": languages if languages else {},
+            "languages": dict(languages) if languages else {},
             "pr_metrics": self._fetch_pr_metrics(repo),
             "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
             "latest_commit": latest_commit,
@@ -189,11 +190,13 @@ class GitHubSource(DataSource):
             merge_time_count = 0
             review_count = 0
             comment_count = 0
-            reviewers = set()
+            reviewers: set[str] = set()
 
             # Limit to recent PRs to avoid rate limits (e.g., last 100)
             max_prs = 100
 
+            from github.PullRequest import PullRequest
+            pr: PullRequest
             for pr in pulls[:max_prs]:
                 pr_count += 1
 
@@ -227,7 +230,7 @@ class GitHubSource(DataSource):
             avg_merge_time = total_merge_time_hours / merge_time_count if merge_time_count > 0 else None
             avg_reviews = review_count / pr_count if pr_count > 0 else 0.0
 
-            return {
+            pr_metrics: Dict[str, Any] = {
                 "pr_count": pr_count,
                 "pr_merged_count": merged_count,
                 "pr_closed_count": closed_count,
@@ -237,11 +240,12 @@ class GitHubSource(DataSource):
                 "pr_comments_count": comment_count,
                 "unique_reviewers": len(reviewers)
             }
+            return pr_metrics
 
         except Exception as e:
             logger.warning(f"Failed to fetch PR metrics for {repo.name}: {e}")
             # Return default empty metrics
-            return {
+            default_metrics: Dict[str, Any] = {
                 "pr_count": 0,
                 "pr_merged_count": 0,
                 "pr_closed_count": 0,
@@ -251,6 +255,7 @@ class GitHubSource(DataSource):
                 "pr_comments_count": 0,
                 "unique_reviewers": 0
             }
+            return default_metrics
 
     def _is_cache_valid(self, cached_data: Dict[str, Any], repo: Repository) -> bool:
         """
@@ -318,12 +323,14 @@ class GitHubSource(DataSource):
 
         try:
             with open(cache_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Cast to ensure proper type
+                return dict(data) if isinstance(data, dict) else None
         except (json.JSONDecodeError, IOError) as e:
             logger.warning(f"Failed to load cache for {repo_name}: {e}")
             return None
 
-    def get_cache_stats(self) -> Dict[str, int]:
+    def get_cache_stats(self) -> Dict[str, Any]:
         """
         Get statistics about cached repositories.
 

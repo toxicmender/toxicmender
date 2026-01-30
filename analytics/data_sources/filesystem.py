@@ -5,7 +5,7 @@ Supports JSON, YAML, and CSV formats.
 from analytics.data_sources.base import DataSource
 from analytics.exceptions import DataSourceError
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Dict
 import json
 import csv
 

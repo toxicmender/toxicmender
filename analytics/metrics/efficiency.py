@@ -28,8 +28,8 @@ class EfficiencyMetric(Metric):
         return self._create_result(repos, values)
 # Example usage:
 if __name__ == "__main__":
-    repo1 = RepoStats(name="Repo1", loc=10000, commits=50)
-    repo2 = RepoStats(name="Repo2", loc=20000, commits=100)
+    repo1 = RepoStats(name="Repo1", loc=10000, commits=50, languages={"Python": 10000})
+    repo2 = RepoStats(name="Repo2", loc=20000, commits=100, languages={"Python": 20000})
 
     efficiency_metric = EfficiencyMetric()
     result = efficiency_metric.compute([repo1, repo2])
