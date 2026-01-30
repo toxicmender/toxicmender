@@ -1,5 +1,5 @@
-"""Migration package initialization."""
+"""Migration package initialization (legacy pruned)."""
 
-from analytics.migration.manager import MigrationManager
+# PRUNED: Legacy migration manager removed.
 
-__all__ = ["MigrationManager"]
+__all__ = []
