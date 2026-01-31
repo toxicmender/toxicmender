@@ -12,7 +12,7 @@ from analytics.charts.repo_vs_stars import RepoVsStarsChart
 from analytics.charts.pr_metrics import PRMetricsChart, ReviewEngagementChart
 from analytics.models.repo import RepoStats
 from analytics.models.metrics import MetricResult
-from typing import List, Tuple, Any, Dict
+from typing import List, Optional, Tuple, Any, Dict
 from pathlib import Path
 import logging
 import json
