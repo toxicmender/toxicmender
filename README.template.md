@@ -326,12 +326,8 @@ Each stage is independently testable and configurable.
 
 Planned improvements to the analytics system:
 - [x] Pull request and code review metrics
-<!-- - [ ] Comparative analysis against similar developers -->tric evolution
-<!-- - [ ] Comparative analysis against similar developers -->
-- [ ] Pull request and code review metrics
 - [ ] Dependency analysis and security scoring
 - [ ] Machine learning-based quality predictions
-<!-- - [ ] Real-time dashboard with live updates -->
 
 ---
 
