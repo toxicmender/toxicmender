@@ -161,16 +161,20 @@ def run(input_dir: Path, output_dir: Path) -> None:
         pr_metrics = None
         if 'pr_metrics' in repo and repo['pr_metrics']:
             pm = repo['pr_metrics']
-            pr_metrics = PRMetrics(
-                pr_count=pm.get('pr_count', 0),
-                pr_merged_count=pm.get('pr_merged_count', 0),
-                pr_closed_count=pm.get('pr_closed_count', 0),
-                avg_pr_merge_time_hours=pm.get('avg_pr_merge_time_hours'),
-                pr_review_count=pm.get('pr_review_count', 0),
-                avg_reviews_per_pr=pm.get('avg_reviews_per_pr', 0.0),
-                pr_comments_count=pm.get('pr_comments_count', 0),
-                unique_reviewers=pm.get('unique_reviewers', 0)
-            )
+            # Handle case where pr_metrics might be a string (data corruption)
+            if isinstance(pm, dict):
+                pr_metrics = PRMetrics(
+                    pr_count=pm.get('pr_count', 0),
+                    pr_merged_count=pm.get('pr_merged_count', 0),
+                    pr_closed_count=pm.get('pr_closed_count', 0),
+                    avg_pr_merge_time_hours=pm.get('avg_pr_merge_time_hours'),
+                    pr_review_count=pm.get('pr_review_count', 0),
+                    avg_reviews_per_pr=pm.get('avg_reviews_per_pr', 0.0),
+                    pr_comments_count=pm.get('pr_comments_count', 0),
+                    unique_reviewers=pm.get('unique_reviewers', 0)
+                )
+            else:
+                logger.warning(f"Skipping invalid pr_metrics for repo {repo.get('name', 'unknown')}: expected dict, got {type(pm).__name__}")
 
         repos.append(RepoStats(
             name=repo['name'],
