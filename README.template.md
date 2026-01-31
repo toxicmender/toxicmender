@@ -1,6 +1,17 @@
-# Analytics Results
+# 👋 Hi, I'm ToxicMender
 
-## 📊 Overview
+- 🔭 I’m currently working on Knowldge Graph based Retrieval Augmented Generation
+- 🌱 I’m currently learning Machine Learning
+<!-- - 👯 I’m looking to collaborate on ... -->
+- 🤔 I’m looking for help with Legal-grag
+- 💬 Ask me about Pokemon, python, ml
+- 📫 How to reach me: Toxicmender@Discord
+- 😄 Pronouns: He/Him
+- ⚡ Fun fact: I sometimes lose my sanity in Valorant
+
+## Analytics Results
+
+### 📊 Overview
 
 This report presents a comprehensive analysis of GitHub repositories based on multiple metrics and scoring systems.
 
@@ -10,7 +21,7 @@ This report presents a comprehensive analysis of GitHub repositories based on mu
 
 ---
 
-## 🎯 Engineering Score
+### 🎯 Engineering Score
 
 **Overall Score**: {engineering_score}/100
 
@@ -34,45 +45,45 @@ The engineering score is a weighted composite metric that evaluates repository q
 
 ---
 
-## 📈 Visualizations
+### 📈 Visualizations
 
-### Repository Metrics Overview
+#### Repository Metrics Overview
 
 ![Category Metrics]({category_chart_path})
 
 This chart displays the normalized scores across all metric categories, providing a visual representation of strengths and areas for improvement.
 
-### Language Distribution
+#### Language Distribution
 
 ![Language Distribution]({language_chart_path})
 
 A breakdown of programming languages used across all repositories, showing the percentage of code written in each language.
 
-### Efficiency Analysis
+#### Efficiency Analysis
 
 ![Efficiency Analysis]({efficiency_chart_path})
 
 Visualizes the relationship between lines of code and commits, highlighting coding patterns and efficiency trends.
 
-### Repository Impact
+#### Repository Impact
 
 ![Repository vs Stars]({repo_stars_chart_path})
 
 Scatter plot showing the correlation between repository size and community engagement (stars).
 
-### Activity Heatmap
+#### Activity Heatmap
 
 ![Activity Heatmap]({heatmap_chart_path})
 
 Temporal analysis of contribution patterns, showing when development activity is most concentrated.
 
-### Pull Request Metrics
+#### Pull Request Metrics
 
 ![PR Metrics]({pr_metrics_chart_path})
 
 Analysis of pull request velocity, review engagement, merge quality, and collaboration patterns across repositories.
 
-### Code Review Engagement
+#### Code Review Engagement
 
 ![Review Engagement]({review_engagement_chart_path})
 
@@ -80,9 +91,9 @@ Detailed view of code review coverage, thoroughness, and reviewer diversity metr
 
 ---
 
-## 🔍 Detailed Metrics
+### 🔍 Detailed Metrics
 
-### Breadth Metric
+#### Breadth Metric
 
 **Definition**: Measures the diversity of programming languages used across repositories.
 
@@ -92,7 +103,7 @@ Detailed view of code review coverage, thoroughness, and reviewer diversity metr
 
 Higher breadth indicates versatility and adaptability across different technology stacks.
 
-### Consistency Metric
+#### Consistency Metric
 
 **Definition**: Evaluates the regularity and maintenance patterns of repositories.
 
@@ -102,7 +113,7 @@ Higher breadth indicates versatility and adaptability across different technolog
 
 Consistent activity demonstrates ongoing maintenance and project dedication.
 
-### Efficiency Metric
+#### Efficiency Metric
 
 **Definition**: Analyzes code quality through the ratio of lines of code to commits.
 
@@ -112,7 +123,7 @@ Consistent activity demonstrates ongoing maintenance and project dedication.
 
 Balanced efficiency suggests thoughtful, incremental development practices.
 
-### Impact Metric
+#### Impact Metric
 
 **Definition**: Quantifies community engagement and repository popularity.
 
@@ -123,7 +134,7 @@ Balanced efficiency suggests thoughtful, incremental development practices.
 
 High impact scores reflect valuable contributions that resonate with the developer community.
 
-### Scale Metric
+#### Scale Metric
 
 **Definition**: Measures repository size and complexity.
 
@@ -134,7 +145,7 @@ High impact scores reflect valuable contributions that resonate with the develop
 
 Scale metrics indicate the scope and ambition of development projects.
 
-### PR Review Metric
+#### PR Review Metric
 
 **Definition**: Measures pull request velocity, quality, and collaboration patterns.
 
@@ -145,7 +156,7 @@ Scale metrics indicate the scope and ambition of development projects.
 
 High PR velocity with good merge rates demonstrates active collaborative development.
 
-### Code Review Metric
+#### Code Review Metric
 
 **Definition**: Evaluates the quality and thoroughness of code review processes.
 
@@ -158,27 +169,27 @@ Thorough code reviews with high coverage indicate strong quality practices.
 
 ---
 
-## 📚 Top Repositories
+### 📚 Top Repositories
 
-### By Stars
+#### By Stars
 
 | Repository | Stars | Forks | Primary Language | LOC |
 |-----------|-------|-------|------------------|-----|
 {top_repos_by_stars}
 
-### By Size
+#### By Size
 
 | Repository | LOC | Commits | Languages | Stars |
 |-----------|-----|---------|-----------|-------|
 {top_repos_by_size}
 
-### By Activity
+#### By Activity
 
 | Repository | Commits | Last Updated | Languages | Impact Score |
 |-----------|---------|--------------|-----------|--------------|
 {top_repos_by_activity}
 
-### By PR Activity
+#### By PR Activity
 
 | Repository | PRs Merged | Merge Rate | Avg Reviews | Unique Reviewers |
 |-----------|-----------|-----------|------------|------------------|
@@ -186,21 +197,21 @@ Thorough code reviews with high coverage indicate strong quality practices.
 
 ---
 
-## 🏆 Key Achievements
+### 🏆 Key Achievements
 
 {achievements_section}
 
 ---
 
-## 🌐 Language Breakdown
+### 🌐 Language Breakdown
 
-### Distribution
+#### Distribution
 
 | Language | Repositories | Total LOC | Percentage | Average LOC/Repo |
 |----------|--------------|-----------|------------|------------------|
 {language_breakdown_table}
 
-### Technology Stack
+#### Technology Stack
 
 - **Most Used Language**: {most_used_language} ({most_used_language_percentage}%)
 - **Language Diversity Index**: {language_diversity_index}
@@ -208,9 +219,9 @@ Thorough code reviews with high coverage indicate strong quality practices.
 
 ---
 
-## 📊 Statistical Summary
+### 📊 Statistical Summary
 
-### Repository Statistics
+#### Repository Statistics
 
 - **Total Repositories**: {total_repos}
 - **Total Lines of Code**: {total_loc:,}
@@ -218,14 +229,14 @@ Thorough code reviews with high coverage indicate strong quality practices.
 - **Total Stars**: {total_stars:,}
 - **Total Forks**: {total_forks:,}
 
-### Averages
+#### Averages
 
 - **Average Repository Size**: {avg_repo_size:,.0f} LOC
 - **Average Commits per Repository**: {avg_commits_per_repo:,.1f}
 - **Average Stars per Repository**: {avg_stars_per_repo:,.1f}
 - **Average Forks per Repository**: {avg_forks_per_repo:,.1f}
 
-### Distributions
+#### Distributions
 
 - **Median Repository Size**: {median_repo_size:,} LOC
 - **Standard Deviation (LOC)**: {std_loc:,.0f}
@@ -233,9 +244,9 @@ Thorough code reviews with high coverage indicate strong quality practices.
 
 ---
 
-## 🎨 Methodology
+### 🎨 Methodology
 
-### Data Collection
+#### Data Collection
 Pull Request Data**: PR counts, merge times, review statistics
 5. **
 Data is collected from GitHub using the PyGithub API, with the following components:
@@ -245,7 +256,7 @@ Data is collected from GitHub using the PyGithub API, with the following compone
 3. **Code Metrics**: Lines of code by language, commit history
 4. **Language Data**: Programming languages and their proportions
 
-### Metric Computation
+#### Metric Computation
 
 Metrics are computed using configurable weights defined in `analytics/config/weights.yml`:
 
@@ -253,7 +264,7 @@ Metrics are computed using configurable weights defined in `analytics/config/wei
 - Raw metric values are normalized using log-based min-max scaling
 - Normalized values are weighted and combined to produce the final engineering score
 
-### Normalization
+#### Normalization
 
 The normalization process ensures fair comparison across different metric scales:
 
@@ -266,7 +277,7 @@ This approach:
 - Preserves relative differences
 - Produces values in the [0, 1] range
 
-### Score Calculation
+#### Score Calculation
 
 The final engineering score is computed as:
 
@@ -278,9 +289,9 @@ Where weights sum to 1.0 and represent the relative importance of each metric.
 
 ---
 
-## 🔧 Configuration
+### 🔧 Configuration
 
-### Weights
+#### Weights
 
 Current metric weights can be adjusted in `analytics/config/weights.yml`:
 
@@ -294,13 +305,13 @@ code_review: {code_review_weight}
 scale: {scale_weight}
 ```
 
-### Categories
+#### Categories
 
 Repository categories and classification rules are defined in `analytics/config/categories.yml`.
 
 ---
 
-## 📖 Pipeline Architecture
+### 📖 Pipeline Architecture
 
 This analysis is generated using a modular pipeline architecture:
 
@@ -313,7 +324,7 @@ Each stage is independently testable and configurable.
 
 ---
 
-## 📝 Notes
+### 📝 Notes
 
 - Analysis includes only public repositories
 - Forked repositories may be included or excluded based on configuration
@@ -322,7 +333,7 @@ Each stage is independently testable and configurable.
 
 ---
 
-## 🚀 Future Enhancements
+### 🚀 Future Enhancements
 
 Planned improvements to the analytics system:
 - [x] Pull request and code review metrics
