@@ -74,7 +74,7 @@ jobs:
           uv pip install matplotlib plotly pyyaml jq
 
       - name: Collect repositories & metadata
-        run: uv run .\main.py collect-data --username toxicmender
+        run: uv run .\main.py collect-data --username toxicmender --token ${{ secrets.TOKEN }}
 
       - name: Analyze LOC
         run: uv run .\main.py analyze-data
